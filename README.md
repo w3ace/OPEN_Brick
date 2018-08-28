@@ -1,8 +1,8 @@
 
 
-Enhanced Lego Brick Builder 
+#Enhanced Lego Brick Builder 
 
-OpenSCAD 3d object builder
+##OpenSCAD 3d object builder
 
 Originally written by Jorg Janssen 2013 (CC BY-NC 3.0) 
 

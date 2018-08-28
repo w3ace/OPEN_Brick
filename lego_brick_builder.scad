@@ -10,34 +10,15 @@
  Height is in flat brick heights, so for a normal lego brick height = 3.
  Add optional smooth = true for a brick without studs. 
  Use height = 0 to just put studs/knobs on top of other things.
+*/
+$fn = 100;
 
- */
-$fn = 150;
+include <_conf.scad>;
 
  // this is it:
-brick(5,1,3);
+brick(4,1,2, studstyle =3);
 
-
-// and this is how it's done:
-
-FLU = 1.6; // Fundamental Lego Unit = 1.6 mm
-
-BRICK_WIDTH = 5*FLU;    // basic brick width
-BRICK_HEIGHT = 6*FLU;   // basic brick height
-PLATE_HEIGHT = 2*FLU;   // basic plate height
-WALL_THICKNESS = FLU;   // outer wall of the brick
-STUD_RADIUS = 1.5*FLU;  // studs are the small cylinders on top of the brick with the lego logo ('nopje' in Dutch)
-STUD_HEIGHT = FLU; 
-ANTI_STUD_RADIUS = 0.5*4.07*FLU;    // an anti stud is the hollow cylinder inside 
-                                    // bricks that have length > 1 and width > 1
-PIN_RADIUS = FLU;           // a pin is the small cylinder inside bricks that have length = 1 or width = 1
-SUPPORT_THICKNESS = 0.8;    // SUPPORT_THICKNESS: support is the thin surface between anti studs, 
-                            // pins and walls, your printer might not print this thin, try thicker!
-EDGE = 0.254;               // EDGE: this is the width and height of the bottom line edge of smooth bricks
-CORRECTION = 0.1;           // CORRECTION: addition to each size, to make sure all parts connect by 
-                            // moving them a little inside each other
-
-module brick(length = 4, width = 2, height = 3, smooth = false){
+module make_shell(length,width,height,smooth,studstyle) {
 
 	 // brick shell /*
 	 difference(){
@@ -47,7 +28,7 @@ module brick(length = 4, width = 2, height = 3, smooth = false){
 			cube(size = [length*BRICK_WIDTH-2*WALL_THICKNESS,width*BRICK_WIDTH-2*WALL_THICKNESS,
                         (height*PLATE_HEIGHT)+(FLU*.25)]);
 			// stud inner holes, radius = pin radius
-		/*	if (!smooth) {
+			if (!smooth && studstyle > 1) {
 				translate([STUD_RADIUS+WALL_THICKNESS,STUD_RADIUS+WALL_THICKNESS,height*PLATE_HEIGHT])
 				for (y = [0:width-1]){
 					for (x = [0:length-1]){
@@ -55,7 +36,7 @@ module brick(length = 4, width = 2, height = 3, smooth = false){
 						cylinder(h=WALL_THICKNESS+2*CORRECTION,r=PIN_RADIUS);
 					}
 				} 
-			} */
+			} 
 			// small bottom line edge for smooth bricks
 			if (smooth) {
 				translate([-WALL_THICKNESS-CORRECTION,-WALL_THICKNESS-CORRECTION,FLU-CORRECTION]) 
@@ -67,56 +48,84 @@ module brick(length = 4, width = 2, height = 3, smooth = false){
 			}
 		}
 	} 
-	// Studs
-	if(!smooth){
+}
+
+module make_studs (length,width,height,studstyle,logo) {
+
 		translate([STUD_RADIUS+WALL_THICKNESS,STUD_RADIUS+WALL_THICKNESS,height*PLATE_HEIGHT])
 		for (y = [0:width-1]){
 			for (x = [0:length-1]){
 				translate ([x*BRICK_WIDTH,y*BRICK_WIDTH,-CORRECTION])
-				difference(){
-					cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
-					// Stud inner holes
-					translate([0,0,-CORRECTION])
-					cylinder(h=0.5*STUD_HEIGHT+CORRECTION,r=PIN_RADIUS);
-				} 
-				/*/ tech logo - disable this if your printer isn't capable of printing this small
-				if ( length > width){
-					translate([x*BRICK_WIDTH+0.8,y*BRICK_WIDTH-1.9,STUD_HEIGHT-CORRECTION])
-					resize([1.2*1.7,2.2*1.7,0.254+CORRECTION])
-					rotate(a=[0,0,90])
-					import("tech.stl"); 
+				if (studstyle == 3) {
+					difference(){
+						cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
+						// Stud inner holes
+						translate([0,0,-CORRECTION])
+						cylinder(h=STUD_HEIGHT*2+CORRECTION,r=PIN_RADIUS);
+					} 
+				} else {
+					difference(){
+						cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
+						// Stud inner holes
+						translate([0,0,-CORRECTION])
+						cylinder(h=0.5*STUD_HEIGHT+CORRECTION,r=PIN_RADIUS);
+					} 
 				}
-				else {
-					translate([x*BRICK_WIDTH-1.9,y*BRICK_WIDTH-0.8,STUD_HEIGHT-CORRECTION])
-					resize([2.2*1.7,1.2*1.7,0.254+CORRECTION])
-					import("tech.stl");				
-				}		*/		
-				 /*
-				// Alternative 2-square logo
-				translate ([x*BRICK_WIDTH+CORRECTION,y*BRICK_WIDTH-CORRECTION,STUD_HEIGHT-CORRECTION])		
-				cube([1,1,2*CORRECTION]);
-				translate ([x*BRICK_WIDTH-0.9,y*BRICK_WIDTH-0.9,STUD_HEIGHT-CORRECTION])		
-				cube([1,1,0.3]);
-						*/	
+				// tech logo - disable this if your printer isn't capable of printing this small
+				if (logo == 2) {
+					if ( length > width){
+						translate([x*BRICK_WIDTH+0.8,y*BRICK_WIDTH-1.9,STUD_HEIGHT-CORRECTION])
+						resize([1.2*1.7,2.2*1.7,0.254+CORRECTION])
+						rotate(a=[0,0,90])
+						import("tech.stl"); 
+					}
+					else {
+						translate([x*BRICK_WIDTH-1.9,y*BRICK_WIDTH-0.8,STUD_HEIGHT-CORRECTION])
+						resize([2.2*1.7,1.2*1.7,0.254+CORRECTION])
+						import("tech.stl");				
+					}		
+				}	
+				if (logo == 3) {
+					translate ([x*BRICK_WIDTH+CORRECTION,y*BRICK_WIDTH-CORRECTION,STUD_HEIGHT-CORRECTION])		
+					cube([1,1,2*CORRECTION]);
+					translate ([x*BRICK_WIDTH-0.9,y*BRICK_WIDTH-0.9,STUD_HEIGHT-CORRECTION])		
+					cube([1,1,0.3]);
+				}	
 			}
 		}
 	}
+
+module brick(length = 4, width = 2, height = 3, smooth = false, studstyle = 1, logo = 1 ){
+
+	make_shell(length,width,height,smooth,studstyle);
+
+	// Studs
+	if(!smooth){
+		make_studs(length,width,height,studstyle,logo);
+	}
+
 	// Pins x
 	if (width == 1 && length > 1) {	
 			for (x = [1:length-1]){
-				translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0])
-                union() {
-                    cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
-                    translate([0,0,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS])
-                        cylinder(h=FLU+CORRECTION,r1=PIN_RADIUS,r2=PIN_RADIUS+1.9);
-                }
-				// Supports
-				if (height > 1) {
-				translate([x*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,CORRECTION,STUD_HEIGHT])
-				cube(size=[SUPPORT_THICKNESS,BRICK_WIDTH-2*CORRECTION,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);
+				if (height > 1 && studstyle == 1) {
+					translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) {
+		                union() {
+		                    cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
+		                    translate([0,0,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS])
+		                        cylinder(h=FLU+CORRECTION,r1=PIN_RADIUS,r2=PIN_RADIUS+1.9);
+		                }
+		            }
+	   				translate([x*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,CORRECTION,STUD_HEIGHT])
+					cube(size=[SUPPORT_THICKNESS,BRICK_WIDTH-2*CORRECTION,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);
+				} else {
+					translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) 
+		            cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
+		            
+		        }
 			}
 		}
-	}
+	
+
 	// Pins y
 	if (length == 1 && width > 1) {	
 			for (y = [1:width-1]){
@@ -168,4 +177,5 @@ module brick(length = 4, width = 2, height = 3, smooth = false){
 		}		
 	}
 }
+
 	
