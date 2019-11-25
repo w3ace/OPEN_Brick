@@ -16,7 +16,7 @@ $fn = 100;
 include <_conf.scad>;
 
  // this is it:
-brick(4,1,2, studstyle =3);
+brick(5,1,1, studstyle =1);
 
 module make_shell(length,width,height,smooth,studstyle) {
 
@@ -107,21 +107,21 @@ module brick(length = 4, width = 2, height = 3, smooth = false, studstyle = 1, l
 	// Pins x
 	if (width == 1 && length > 1) {	
 			for (x = [1:length-1]){
-				if (height > 1 && studstyle == 1) {
-					translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) {
-		                union() {
-		                    cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
-		                    translate([0,0,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS])
-		                        cylinder(h=FLU+CORRECTION,r1=PIN_RADIUS,r2=PIN_RADIUS+1.9);
-		                }
-		            }
-	   				translate([x*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,CORRECTION,STUD_HEIGHT])
-					cube(size=[SUPPORT_THICKNESS,BRICK_WIDTH-2*CORRECTION,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);
-				} else {
-					translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) 
-		            cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
-		            
-		        }
+				if (height > 1 ) {
+					if( studstyle == 1) {
+						translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) {
+			                union() {
+			                    cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
+			                    translate([0,0,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS])
+			                        cylinder(h=FLU+CORRECTION,r1=PIN_RADIUS,r2=PIN_RADIUS+1.9);
+			                }
+			            }
+			        }
+}
+		   				translate([x*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,CORRECTION,STUD_HEIGHT])
+						cube(size=[SUPPORT_THICKNESS,BRICK_WIDTH-2*CORRECTION,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);
+			//	translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) 
+	        //     cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);			            
 			}
 		}
 	
