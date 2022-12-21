@@ -16,19 +16,127 @@ $fn = 100;
 include <_conf.scad>;
 
  // this is it:
-brick(5,1,1, studstyle =1);
+ color("gray") 
+ //brick(1,6,3);
+ //
+	round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-module make_shell(length,width,height,smooth,studstyle) {
 
-	 // brick shell /*
+// module brick
+// 
+// create a lego brick length x width x height 
+
+module brick(length = 4, width = 2, height = 3, studstyle = 1 ){
+
+	difference() {
+		union() {
+			make_shell(length,width,height,studstyle);
+
+			// Studs
+			if(studstyle>0){
+				make_studs(length,width,height,studstyle);
+			}
+			antistuds(length,width,height,studstyle);
+		}
+	//	chamfer_corners(length,width,height);
+	}
+}
+
+
+// module round_brick
+//
+// create a circular lego brick 
+
+module round_brick(length = 4, width = 2, height = 3, radius = 2, inner_radius = 1, studstyle = 1,degrees=360) {
+
+	// Round the x and y corners of the brick
+	difference() {
+		union() {  // Circle , Outer Wall, INner Wall
+			intersection() {
+				// Combine a brick with circle 
+				brick(length,width,height,studstyle);
+				translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
+					linear_extrude(height*2*PLATE_HEIGHT) {
+						circle(radius*BRICK_WIDTH);
+					}
+
+				}
+			}
+			// Make Walls for 1/2 and 1/4 circles
+			if(degrees<=180) {
+				translate([0,length*BRICK_WIDTH/2,0])
+					cube([length*BRICK_WIDTH,WALL_THICKNESS,height*PLATE_HEIGHT]);
+				if(degrees==90) {
+					translate([width*BRICK_WIDTH/2,0,0])
+						cube([WALL_THICKNESS,width*BRICK_WIDTH,height*PLATE_HEIGHT]);
+				}
+			}
+
+			// Outer Wall
+			translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
+				linear_extrude(height*PLATE_HEIGHT) {
+					difference() {
+						circle(radius*BRICK_WIDTH);
+						circle((radius*BRICK_WIDTH)-WALL_THICKNESS);
+					}
+
+				}
+			}
+			// Inner Wall
+			translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
+				linear_extrude(height*PLATE_HEIGHT) {
+					difference() {
+						circle(inner_radius*BRICK_WIDTH+WALL_THICKNESS);
+						circle(inner_radius*BRICK_WIDTH);
+					}
+
+				}
+			}
+		}
+		// Inner Radius Cutout
+		translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,-CORRECTION]) {
+			linear_extrude(height*1.2*PLATE_HEIGHT+CORRECTION) {
+				circle(inner_radius*BRICK_WIDTH);
+			}
+		}
+		// Cut circle into 1/2 and 1/4
+		if(degrees <= 180) {
+			cube([length*BRICK_WIDTH,width*BRICK_WIDTH/2,height*1.2*PLATE_HEIGHT]);
+			if(degrees == 90) { 
+				cube([length*BRICK_WIDTH/2,width*BRICK_WIDTH,height*1.2*PLATE_HEIGHT]);
+			}
+		}
+		// Make Anti Studs that break the Inner and Outer Walls
+		make_studs(length,width,height,studstyle=4);	
+	}
+
+}
+
+module chamfer_corners (length,width,height) {
+
+	for (i = [0:1]) {
+		for (j = [0:1]) {
+			echo (length*i,width*j);
+			translate([length*BRICK_WIDTH*i,width*BRICK_WIDTH*j,0])
+				linear_extrude(height*1.2*PLATE_HEIGHT)
+					rotate([0,0,((i==1) ? 100 : 10)])
+					scale([1,5,1])
+					square(CORRECTION*4, center=true);
+		}
+	}
+}
+
+module make_shell(length,width,height,studstyle=0) {
+
+	 // brick shell 
 	 difference(){
-		cube(size = [length*BRICK_WIDTH,width*BRICK_WIDTH,height*PLATE_HEIGHT]);
+		cube(size = [length*BRICK_WIDTH-CORRECTION,width*BRICK_WIDTH-CORRECTION,height*PLATE_HEIGHT]);
 		translate([WALL_THICKNESS,WALL_THICKNESS,-WALL_THICKNESS])
 		union(){
 			cube(size = [length*BRICK_WIDTH-2*WALL_THICKNESS,width*BRICK_WIDTH-2*WALL_THICKNESS,
                         (height*PLATE_HEIGHT)+(FLU*.25)]);
 			// stud inner holes, radius = pin radius
-			if (!smooth && studstyle > 1) {
+			if (studstyle != 0) {
 				translate([STUD_RADIUS+WALL_THICKNESS,STUD_RADIUS+WALL_THICKNESS,height*PLATE_HEIGHT])
 				for (y = [0:width-1]){
 					for (x = [0:length-1]){
@@ -38,7 +146,7 @@ module make_shell(length,width,height,smooth,studstyle) {
 				} 
 			} 
 			// small bottom line edge for smooth bricks
-			if (smooth) {
+			if (studstyle !=0) {
 				translate([-WALL_THICKNESS-CORRECTION,-WALL_THICKNESS-CORRECTION,FLU-CORRECTION]) 
 				difference() {
 					cube([length*BRICK_WIDTH+2*CORRECTION,width*BRICK_WIDTH+2*CORRECTION,EDGE+CORRECTION]);
@@ -50,12 +158,13 @@ module make_shell(length,width,height,smooth,studstyle) {
 	} 
 }
 
-module make_studs (length,width,height,studstyle,logo) {
+module make_studs (length,width,height,studstyle=1) {
 
-		translate([STUD_RADIUS+WALL_THICKNESS,STUD_RADIUS+WALL_THICKNESS,height*PLATE_HEIGHT])
+		translate([STUD_RADIUS+WALL_THICKNESS,STUD_RADIUS+WALL_THICKNESS,((studstyle==4) ? 0 : height*PLATE_HEIGHT)])			
 		for (y = [0:width-1]){
 			for (x = [0:length-1]){
 				translate ([x*BRICK_WIDTH,y*BRICK_WIDTH,-CORRECTION])
+				// Studstyle 3 Technic style studs
 				if (studstyle == 3) {
 					difference(){
 						cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
@@ -63,79 +172,57 @@ module make_studs (length,width,height,studstyle,logo) {
 						translate([0,0,-CORRECTION])
 						cylinder(h=STUD_HEIGHT*2+CORRECTION,r=PIN_RADIUS);
 					} 
-				} else {
+				} else if (studstyle == 2) {
+					// Half filled Stud
 					difference(){
 						cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
 						// Stud inner holes
 						translate([0,0,-CORRECTION])
-						cylinder(h=0.5*STUD_HEIGHT+CORRECTION,r=PIN_RADIUS);
-					} 
-				}
-				// tech logo - disable this if your printer isn't capable of printing this small
-				if (logo == 2) {
-					if ( length > width){
-						translate([x*BRICK_WIDTH+0.8,y*BRICK_WIDTH-1.9,STUD_HEIGHT-CORRECTION])
-						resize([1.2*1.7,2.2*1.7,0.254+CORRECTION])
-						rotate(a=[0,0,90])
-						import("tech.stl"); 
+							cylinder(h=0.5*STUD_HEIGHT+CORRECTION,r=PIN_RADIUS);
 					}
-					else {
-						translate([x*BRICK_WIDTH-1.9,y*BRICK_WIDTH-0.8,STUD_HEIGHT-CORRECTION])
-						resize([2.2*1.7,1.2*1.7,0.254+CORRECTION])
-						import("tech.stl");				
-					}		
+				} else if (studstyle >0) {
+					// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
+					cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION : CORRECTION*1.4), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.4 : 0));
 				}	
-				if (logo == 3) {
-					translate ([x*BRICK_WIDTH+CORRECTION,y*BRICK_WIDTH-CORRECTION,STUD_HEIGHT-CORRECTION])		
-					cube([1,1,2*CORRECTION]);
-					translate ([x*BRICK_WIDTH-0.9,y*BRICK_WIDTH-0.9,STUD_HEIGHT-CORRECTION])		
-					cube([1,1,0.3]);
-				}	
+
+		
 			}
 		}
 	}
 
-module brick(length = 4, width = 2, height = 3, smooth = false, studstyle = 1, logo = 1 ){
 
-	make_shell(length,width,height,smooth,studstyle);
-
-	// Studs
-	if(!smooth){
-		make_studs(length,width,height,studstyle,logo);
-	}
+module antistuds (length = 4, width = 2, height = 3, studstyle = 1){
 
 	// Pins x
 	if (width == 1 && length > 1) {	
-			for (x = [1:length-1]){
-				if (height > 1 ) {
-					if( studstyle == 1) {
-						translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) {
-			                union() {
-			                    cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
-			                    translate([0,0,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS])
-			                        cylinder(h=FLU+CORRECTION,r1=PIN_RADIUS,r2=PIN_RADIUS+1.9);
-			                }
-			            }
-			        }
-}
-		   				translate([x*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,CORRECTION,STUD_HEIGHT])
-						cube(size=[SUPPORT_THICKNESS,BRICK_WIDTH-2*CORRECTION,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);
-			//	translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) 
-	        //     cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);			            
+		for (x = [1:length-1]){
+			if (height > 1 ) {
+				if( studstyle == 1) {
+					translate([x*BRICK_WIDTH,0.5*BRICK_WIDTH,0]) {
+		                union() {
+		                    cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
+		                    translate([0,0,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS])
+		                        cylinder(h=FLU+CORRECTION,r1=PIN_RADIUS,r2=PIN_RADIUS+1.9);
+		                }
+		            }
+		        }
 			}
+	   		translate([x*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,CORRECTION,STUD_HEIGHT])
+				cube(size=[SUPPORT_THICKNESS,BRICK_WIDTH-2*CORRECTION,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);
 		}
+	}
 	
 
 	// Pins y
 	if (length == 1 && width > 1) {	
-			for (y = [1:width-1]){
+		for (y = [1:width-1]) {
 			translate([0.5*BRICK_WIDTH,y*BRICK_WIDTH,0])
-			cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
+				cylinder(h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,r=PIN_RADIUS);
 			// Supports
 			if (height > 1) {
-			translate([CORRECTION,y*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,STUD_HEIGHT])
-			cube(size=[BRICK_WIDTH-2*CORRECTION,SUPPORT_THICKNESS,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);}
-			
+				translate([CORRECTION,y*BRICK_WIDTH-0.5*SUPPORT_THICKNESS,STUD_HEIGHT])
+				cube(size=[BRICK_WIDTH-2*CORRECTION,SUPPORT_THICKNESS,height*PLATE_HEIGHT-STUD_HEIGHT-WALL_THICKNESS+CORRECTION]);
+			}	
 		}
 	}
 	// Anti Studs
