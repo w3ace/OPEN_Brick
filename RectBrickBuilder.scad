@@ -11,30 +11,16 @@
  Add optional smooth = true for a brick without studs. 
  Use height = 0 to just put studs/knobs on top of other things.
 */
-$fn = 100;
 
-include <_conf.scad>;
-
- // this is it:
- color("gray") 
- //brick(1,6,3);
- //
-	round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
-
-
-// module brick
-// 
-// create a lego brick length x width x height 
-
-module brick(length = 4, width = 2, height = 3, studstyle = 1 ){
+module rectBrick (length = 4, width = 2, height = 3, studstyle = 1 ){
 
 	difference() {
 		union() {
-			make_shell(length,width,height,studstyle);
+			makeShell(length,width,height,studstyle);
 
 			// Studs
 			if(studstyle>0){
-				make_studs(length,width,height,studstyle);
+				makeStuds(length,width,height,studstyle);
 			}
 			antistuds(length,width,height,studstyle);
 		}
@@ -42,91 +28,7 @@ module brick(length = 4, width = 2, height = 3, studstyle = 1 ){
 	}
 }
 
-
-// module round_brick
-//
-// create a circular lego brick 
-
-module round_brick(length = 4, width = 2, height = 3, radius = 2, inner_radius = 1, studstyle = 1,degrees=360) {
-
-	// Round the x and y corners of the brick
-	difference() {
-		union() {  // Circle , Outer Wall, INner Wall
-			intersection() {
-				// Combine a brick with circle 
-				brick(length,width,height,studstyle);
-				translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
-					linear_extrude(height*2*PLATE_HEIGHT) {
-						circle(radius*BRICK_WIDTH);
-					}
-
-				}
-			}
-			// Make Walls for 1/2 and 1/4 circles
-			if(degrees<=180) {
-				translate([0,length*BRICK_WIDTH/2,0])
-					cube([length*BRICK_WIDTH,WALL_THICKNESS,height*PLATE_HEIGHT]);
-				if(degrees==90) {
-					translate([width*BRICK_WIDTH/2,0,0])
-						cube([WALL_THICKNESS,width*BRICK_WIDTH,height*PLATE_HEIGHT]);
-				}
-			}
-
-			// Outer Wall
-			translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
-				linear_extrude(height*PLATE_HEIGHT) {
-					difference() {
-						circle(radius*BRICK_WIDTH);
-						circle((radius*BRICK_WIDTH)-WALL_THICKNESS);
-					}
-
-				}
-			}
-			// Inner Wall
-			translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
-				linear_extrude(height*PLATE_HEIGHT) {
-					difference() {
-						circle(inner_radius*BRICK_WIDTH+WALL_THICKNESS);
-						circle(inner_radius*BRICK_WIDTH);
-					}
-
-				}
-			}
-		}
-		// Inner Radius Cutout
-		translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,-CORRECTION]) {
-			linear_extrude(height*1.2*PLATE_HEIGHT+CORRECTION) {
-				circle(inner_radius*BRICK_WIDTH);
-			}
-		}
-		// Cut circle into 1/2 and 1/4
-		if(degrees <= 180) {
-			cube([length*BRICK_WIDTH,width*BRICK_WIDTH/2,height*1.2*PLATE_HEIGHT]);
-			if(degrees == 90) { 
-				cube([length*BRICK_WIDTH/2,width*BRICK_WIDTH,height*1.2*PLATE_HEIGHT]);
-			}
-		}
-		// Make Anti Studs that break the Inner and Outer Walls
-		make_studs(length,width,height,studstyle=4);	
-	}
-
-}
-
-module chamfer_corners (length,width,height) {
-
-	for (i = [0:1]) {
-		for (j = [0:1]) {
-			echo (length*i,width*j);
-			translate([length*BRICK_WIDTH*i,width*BRICK_WIDTH*j,0])
-				linear_extrude(height*1.2*PLATE_HEIGHT)
-					rotate([0,0,((i==1) ? 100 : 10)])
-					scale([1,5,1])
-					square(CORRECTION*4, center=true);
-		}
-	}
-}
-
-module make_shell(length,width,height,studstyle=0) {
+module makeShell(length,width,height,studstyle=0) {
 
 	 // brick shell 
 	 difference(){
@@ -158,7 +60,7 @@ module make_shell(length,width,height,studstyle=0) {
 	} 
 }
 
-module make_studs (length,width,height,studstyle=1) {
+module makeStuds (length,width,height,studstyle=1) {
 
 		translate([STUD_RADIUS+WALL_THICKNESS,STUD_RADIUS+WALL_THICKNESS,((studstyle==4) ? 0 : height*PLATE_HEIGHT)])			
 		for (y = [0:width-1]){
@@ -182,7 +84,7 @@ module make_studs (length,width,height,studstyle=1) {
 					}
 				} else if (studstyle >0) {
 					// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
-					cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION : CORRECTION*1.4), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.4 : 0));
+					cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION*2 : CORRECTION), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.4 : 0));
 				}	
 
 		
