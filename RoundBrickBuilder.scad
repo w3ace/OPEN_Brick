@@ -5,7 +5,6 @@ Make Round Bricks for 3d printing that are compatible with LEGO brands bricks.
 
 */
 
-
 module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,degrees=360) {
 
 	// roundBrick - build a round toy brick
@@ -13,63 +12,55 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 	//  outer_radius, inner_radius-			Number of studs wide the outer circle and inner circle will be
 	//  
 
- 	difference() {
-		intersection() {  
-			union() {  
-				// Draw side walls and top of the building brick
-				rotate_extrude()
-					translate([(inner_radius+1)*BRICK_WIDTH,0,0])
+
+	intersection() {  
+		union() {  
+			// Draw side walls and top of the building brick
+		 	difference() {
+				rotate_extrude(angle=degrees)
+					translate([(inner_radius)*BRICK_WIDTH,0,0])
 						difference() {
 							square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT]);
 							translate([WALL_THICKNESS,0,0])
 								square([(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT-WALL_THICKNESS]);					
 						}
-				//  Add Studs on top of Brick where they belong
-				makeRoundStuds((outer_radius+1),(inner_radius+1),height,studstyle);
-				//  Add AntiStuds   Hollow Columns inside Building Brick
-				makeRoundAntistuds((outer_radius+1),(inner_radius+1),height);
+				//  Difference Studs - (studstyle == 4) cuttouts at the bottom in the inner and outer wall where other studs attach		
+				makeRoundStuds(outer_radius+1,inner_radius-1,0,studstyle=4,degrees);	
+			}
+			//  Add Studs on top of Brick where they belong
+			makeRoundStuds(outer_radius,inner_radius,height,studstyle,degrees);
+			//  Add AntiStuds   Hollow Columns inside Building Brick
+			makeRoundAntistuds(outer_radius,inner_radius,height,degrees);
 
-		if(degrees<=180) {
-			translate([-(outer_radius+1)*BRICK_WIDTH,0,0])
-				cube([(outer_radius+1)*2*BRICK_WIDTH,WALL_THICKNESS,height*PLATE_HEIGHT]);
-			if(degrees==90) {
-				translate([-WALL_THICKNESS,-(outer_radius+1)*BRICK_WIDTH,0])
-					cube([WALL_THICKNESS,(outer_radius+1)*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
+			if(degrees<=180) {
+				translate([-outer_radius*BRICK_WIDTH,0,0])
+					cube([outer_radius*2*BRICK_WIDTH,WALL_THICKNESS,height*PLATE_HEIGHT]);
+	 			if(degrees==90) {
+					translate([-WALL_THICKNESS,-outer_radius*BRICK_WIDTH,0])
+						cube([WALL_THICKNESS*2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
+				}
 			}
 		}
-
-
-			}
 			// Intersect to cut studs that stick are part on / part off the circle
-			rotate_extrude()
-				translate([(inner_radius+1)*BRICK_WIDTH,0,0])
-					square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2]);
-		}
-		//  Difference Studs - (studstyle == 4) cuttouts at the bottom in the inner and outer wall where other studs attach		
-		makeRoundStuds((outer_radius+1),(inner_radius+1),0,studstyle=4);	
-			// Cut circle into 1/2 and 1/4
-		if(degrees <= 180) {
-			translate([-(outer_radius+1)*BRICK_WIDTH,-(outer_radius+1)*BRICK_WIDTH,0])
-			cube([(outer_radius+1)*BRICK_WIDTH*2,(outer_radius+1)*BRICK_WIDTH,height*1.2*PLATE_HEIGHT]);
-			if(degrees == 90) { 
-				cube([(outer_radius+1)*BRICK_WIDTH,(outer_radius+1)*BRICK_WIDTH*2,height*1.2*PLATE_HEIGHT]);
-			}
-		}
-
+		rotate_extrude(angle=degrees)
+			translate([inner_radius*BRICK_WIDTH,0,0])
+				square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2]);
 	}
+
 }
 
-module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1) {
+module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees=360) {
 
 	// Make Studs for Round Bricks that only place studs that are wanted 
 	// 
 	//  
 
-	for (y = [-outer_radius-.5:1:outer_radius+.5]){
-		for (x = [-outer_radius+.5:1:outer_radius-.5]){
+	for (y = [((degrees<=180)?-.5:-outer_radius-.5):outer_radius-.5]){		
+		for (x = [((degrees<=90)?-.5:-outer_radius-.5):outer_radius-.5]){
 
 
-			if((x*x+y*y <= ((outer_radius+((studstyle==4)?.5:0))*(outer_radius+((studstyle==4)?.5:0))*4)/4) && (x*x+y*y >= (inner_radius*inner_radius*4-((studstyle==4)?10:0))/4)) {
+			if((x*x+y*y <= ((outer_radius+((studstyle==4)?.5:0))*(outer_radius+((studstyle==4)?.5:0))*4)/4) 
+					&& (x*x+y*y >= (inner_radius-((studstyle==4)?.5:0))*(inner_radius-((studstyle==4)?.5:0))*4/4)) {
 				translate ([x*BRICK_WIDTH,y*BRICK_WIDTH,height*PLATE_HEIGHT-CORRECTION])
 					if (studstyle == 3) {
 					// Studstyle 3 Technic style studs
@@ -81,7 +72,7 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1) {
 						} 
 					} else {
 						// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
-						cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION*2 : 0), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.4 : 0));
+						cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION*2 : 0), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.3 : 0));
 
 					}
 
@@ -90,20 +81,47 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1) {
 	}
 }
 
-module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3) {
+module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees=360) {
 
-	for (y = [-outer_radius:outer_radius]){
-		for (x = [-outer_radius:outer_radius]){
-			if((x*x+y*y <= ((outer_radius+1)*(outer_radius+1)*4)/4) && (x*x+y*y >= (inner_radius-1*inner_radius-1*4)/4)) {
-				translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
-					difference() {
-						cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS);
-						cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/2);
+
+	difference() {
+		union() {
+			// Supports between AntiStuds X and y
+			for (x = [((degrees<=90)?0:-outer_radius):outer_radius]){		
+				translate([x*BRICK_WIDTH,0,STUD_HEIGHT+.2+(height*PLATE_HEIGHT)/2])
+					cube([SUPPORT_THICKNESS,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT-STUD_HEIGHT*2-WALL_THICKNESS],center=true);
+			}
+			for (y = [((degrees<=180)?0:-outer_radius):outer_radius]){		
+				translate([0,y*BRICK_WIDTH,STUD_HEIGHT+.2+(height*PLATE_HEIGHT)/2])
+					cube([outer_radius*2*BRICK_WIDTH,SUPPORT_THICKNESS,height*PLATE_HEIGHT-STUD_HEIGHT*2-WALL_THICKNESS],center=true);
+			}
+
+			// Antistud cylinders
+			for (y = [((degrees<=180)?0:-outer_radius):outer_radius]){		
+				for (x = [((degrees<=90)?0:-outer_radius):outer_radius]){
+					if ((x*x+y*y <= outer_radius*outer_radius*4/4) && (x*x+y*y >= inner_radius*inner_radius*4/4)) {
+						translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
+							cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS);
+								cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/2);
 					}
+				}
+			}
+		}
+
+		// Hollow out Antistuds
+		for (y = [((degrees<=180)?0:-outer_radius):outer_radius]){		
+			for (x = [((degrees<=90)?0:-outer_radius):outer_radius]){
+				if((x*x+y*y <= ((outer_radius+1)*(outer_radius+1)*4)/4) 
+					&& (x*x+y*y >= ((inner_radius-1)*(inner_radius-1)*4)/4)) {
+					translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
+						cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/2);
+				}
 			}
 		}
 	}
+
 }		
+
 
 // module round_brick
 //
