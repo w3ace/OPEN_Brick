@@ -18,12 +18,12 @@ include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
 
  // this is it:
- color("gray") 
+ color("green") 
  //brick(1,6,3);
  //
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
-roundBrick(4,3,3,degrees=180);
+roundBrick(4,2,3,degrees=90);
 
 // module brick
 // 

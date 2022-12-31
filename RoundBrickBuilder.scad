@@ -12,8 +12,7 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 	//  outer_radius, inner_radius-			Number of studs wide the outer circle and inner circle will be
 	//  
 
-
-	intersection() {  
+	 intersection() {  
 		union() {  
 			// Draw side walls and top of the building brick
 		 	difference() {
@@ -25,7 +24,7 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 								square([(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT-WALL_THICKNESS]);					
 						}
 				//  Difference Studs - (studstyle == 4) cuttouts at the bottom in the inner and outer wall where other studs attach		
-				makeRoundStuds(outer_radius+1,inner_radius-1,0,studstyle=4,degrees);	
+				makeRoundStuds(outer_radius+1,inner_radius-1,0,4,degrees);
 			}
 			//  Add Studs on top of Brick where they belong
 			makeRoundStuds(outer_radius,inner_radius,height,studstyle,degrees);
@@ -42,12 +41,26 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 			}
 		}
 			// Intersect to cut studs that stick are part on / part off the circle
-		rotate_extrude(angle=degrees)
-			translate([inner_radius*BRICK_WIDTH,0,0])
+	rotate_extrude(angle=degrees)
+		translate([inner_radius*BRICK_WIDTH,0,0])
 				square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2]);
 	}
 
 }
+
+module makeCobble(outer_radius=2,inner_radius=1,height=3,degrees=360) {
+
+	color("blue")
+		translate([outer_radius*BRICK_WIDTH,0,0])
+			linear_extrude(BRICK_WIDTH*.2)
+				difference() {
+					square(PLATE_HEIGHT,PLATE_HEIGHT*2);
+					square(PLATE_HEIGHT*.9,PLATE_HEIGHT*1.8);
+				}
+
+}
+
+
 
 module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees=360) {
 
@@ -71,8 +84,9 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 							cylinder(h=STUD_HEIGHT*2,r=PIN_RADIUS);
 						} 
 					} else {
+						echo (STUD_HEIGHT,studstyle);
 						// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
-						cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION*2 : 0), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.3 : 0));
+						cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION*2: 0), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.3 : 0));
 
 					}
 
@@ -102,7 +116,7 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees=360) {
 					if ((x*x+y*y <= outer_radius*outer_radius*4/4) && (x*x+y*y >= inner_radius*inner_radius*4/4)) {
 						translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
 							cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS);
-								cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/2);
+								cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/1.8);
 					}
 				}
 			}
@@ -111,13 +125,26 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees=360) {
 		// Hollow out Antistuds
 		for (y = [((degrees<=180)?0:-outer_radius):outer_radius]){		
 			for (x = [((degrees<=90)?0:-outer_radius):outer_radius]){
-				if((x*x+y*y <= ((outer_radius+1)*(outer_radius+1)*4)/4) 
-					&& (x*x+y*y >= ((inner_radius-1)*(inner_radius-1)*4)/4)) {
-					translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
+				if((x*x+y*y <= ((outer_radius+.5)*(outer_radius+.5)*4)/4) 
+					&& (x*x+y*y >= ((inner_radius-.5)*(inner_radius-.5)*4)/4)) {
+					translate ([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
 						cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/2);
+				
+					// Add holes in counter studs to increase flexibility and decrease plastic use
+					if (height>2)
+						translate ([x*BRICK_WIDTH-BRICK_WIDTH/4-WALL_THICKNESS/4,y*BRICK_WIDTH+BRICK_WIDTH/4+WALL_THICKNESS/4,PLATE_HEIGHT*1.5])
+							rotate ([45,90,0]) 
+								cylinder (h=ANTI_STUD_RADIUS*2.1, r = ANTI_STUD_RADIUS-WALL_THICKNESS);
+					//		rotate ([45,45,0]) 
+						translate ([x*BRICK_WIDTH-BRICK_WIDTH/4-WALL_THICKNESS/4,y*BRICK_WIDTH-BRICK_WIDTH/4+WALL_THICKNESS/4,PLATE_HEIGHT*.75])
+							rotate ([-45,90,0])
+								cylinder (h=ANTI_STUD_RADIUS*2.1, r = ANTI_STUD_RADIUS-WALL_THICKNESS);
+						
 				}
 			}
 		}
+
+
 	}
 
 }		
