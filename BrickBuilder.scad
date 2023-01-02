@@ -23,7 +23,7 @@ include <RoundBrickBuilder.scad>;
  //
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
-roundBrick(4,2,3,degrees=90);
+roundBrick(4,3,3,degrees=90);
 
 // module brick
 // 

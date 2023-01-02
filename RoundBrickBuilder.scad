@@ -11,41 +11,51 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 	// 
 	//  outer_radius, inner_radius-			Number of studs wide the outer circle and inner circle will be
 	//  
+	difference() {
+		intersection() {  
+			union() {  
+				// Draw side walls and top of the building brick
+			 	difference() {
+					rotate_extrude(angle=degrees)
+						translate([(inner_radius)*BRICK_WIDTH,0,0])
+							difference() {
+								square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT]);
+								translate([WALL_THICKNESS,0,0])
+									square([(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT-WALL_THICKNESS/2]);					
+							}
+					//  Difference Studs - (studstyle == 4) cuttouts at the bottom in the inner and outer wall where other studs attach		
+					makeRoundStuds(outer_radius+1,inner_radius-1,0,4,degrees);
+				}
+				//  Add Studs on top of Brick where they belong
+				makeRoundStuds(outer_radius,inner_radius,height,studstyle,degrees);
+				//  Add AntiStuds   Hollow Columns inside Building Brick
+				makeRoundAntistuds(outer_radius,inner_radius,height,degrees);
 
-	 intersection() {  
-		union() {  
-			// Draw side walls and top of the building brick
-		 	difference() {
-				rotate_extrude(angle=degrees)
-					translate([(inner_radius)*BRICK_WIDTH,0,0])
-						difference() {
-							square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT]);
-							translate([WALL_THICKNESS,0,0])
-								square([(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT-WALL_THICKNESS]);					
-						}
-				//  Difference Studs - (studstyle == 4) cuttouts at the bottom in the inner and outer wall where other studs attach		
-				makeRoundStuds(outer_radius+1,inner_radius-1,0,4,degrees);
-			}
-			//  Add Studs on top of Brick where they belong
-			makeRoundStuds(outer_radius,inner_radius,height,studstyle,degrees);
-			//  Add AntiStuds   Hollow Columns inside Building Brick
-			makeRoundAntistuds(outer_radius,inner_radius,height,degrees);
-
-			if(degrees<=180) {
-				translate([-outer_radius*BRICK_WIDTH,0,0])
-					cube([outer_radius*2*BRICK_WIDTH,WALL_THICKNESS,height*PLATE_HEIGHT]);
-	 			if(degrees==90) {
-					translate([-WALL_THICKNESS,-outer_radius*BRICK_WIDTH,0])
-						cube([WALL_THICKNESS*2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
+				if(degrees<=180) {
+					translate([-outer_radius*BRICK_WIDTH,0,0])
+						cube([outer_radius*2*BRICK_WIDTH,WALL_THICKNESS,height*PLATE_HEIGHT]);
+		 			if(degrees==90) {
+						translate([-WALL_THICKNESS,-outer_radius*BRICK_WIDTH,0])
+							cube([WALL_THICKNESS*2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
+					}
 				}
 			}
+				// Intersect to cut studs that stick are part on / part off the circle
+			rotate_extrude(angle=degrees)
+				translate([inner_radius*BRICK_WIDTH,0,0])
+						square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2]);
 		}
-			// Intersect to cut studs that stick are part on / part off the circle
-	rotate_extrude(angle=degrees)
-		translate([inner_radius*BRICK_WIDTH,0,0])
-				square([(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2]);
-	}
 
+		// Cut back a small bit of the 90 and 180 brick straight ends to account for 3d printing error	
+		if(degrees<=180) {
+			translate([-outer_radius*BRICK_WIDTH,0,0])
+				cube([outer_radius*2*BRICK_WIDTH,WALL_THICKNESS*.2,height*PLATE_HEIGHT]);
+				if(degrees==90) {
+					translate([0,-outer_radius*BRICK_WIDTH,0])
+						cube([WALL_THICKNESS*.2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
+			}
+		}
+	}
 }
 
 module makeCobble(outer_radius=2,inner_radius=1,height=3,degrees=360) {
@@ -84,7 +94,6 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 							cylinder(h=STUD_HEIGHT*2,r=PIN_RADIUS);
 						} 
 					} else {
-						echo (STUD_HEIGHT,studstyle);
 						// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
 						cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION*2: 0), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.3 : 0));
 
