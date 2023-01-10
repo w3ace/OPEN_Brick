@@ -16,6 +16,9 @@ $fn = 100;
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
+// include <ReducerBrickBuilder.scad>;
+
+
 
  // this is it:
  color("green") 
@@ -23,7 +26,14 @@ include <RoundBrickBuilder.scad>;
  //
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
-roundBrick(4,3,3,degrees=90);
+
+roundBrick(5,4,3,topstyle=0,degrees=180);
+//
+
+//reducerBrick(5,4,3,degrees=90);
+
+
+//roundBrick(4,3,3,degrees=90);
 
 // module brick
 // 
