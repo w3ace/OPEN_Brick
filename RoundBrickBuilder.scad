@@ -6,14 +6,6 @@ Make Round Bricks for 3d printing that are compatible with LEGO brands bricks.
 */
 
 
-module reducerBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,degrees=360) {
-					rotate_extrude(angle=degrees)
-						translate([(inner_radius+0.01)*BRICK_WIDTH,0,0])
-
-								polygon([[0,0],[0,(outer_radius-inner_radius-0.02)*BRICK_WIDTH],[PLATE_HEIGHT,(outer_radius-inner_radius-0.02)*BRICK_WIDTH]]);
-							}
-
-
 
 module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,topstyle=0,degrees=360) {
 
@@ -39,7 +31,7 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 								translate([WALL_THICKNESS,0,0])
 									if(topstyle == 1) { // Reducer
 										polygon([[0,0],
-												[0,height*PLATE_HEIGHT-WALL_THICKNESS],
+												[0,height*PLATE_HEIGHT-PLATE_HEIGHT],
 												[(outer_radius-inner_radius-0.02)*BRICK_WIDTH-WALL_THICKNESS*2,PLATE_HEIGHT],
 												[(outer_radius-inner_radius-0.02)*BRICK_WIDTH-WALL_THICKNESS*2,0]]);
 									} else {
@@ -138,13 +130,13 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees=360) {
 	difference() {
 		union() {
 			// Supports between AntiStuds X and y
-			for (x = [((degrees<=90)?0:-outer_radius):outer_radius]){		
-				translate([x*BRICK_WIDTH,0,STUD_HEIGHT*1.4])
-					cube([SUPPORT_THICKNESS,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT-STUD_HEIGHT*1.4],center=false);
+			for (x = [-outer_radius:outer_radius]){
+				translate([x*BRICK_WIDTH,-WALL_THICKNESS,STUD_HEIGHT*1.4+((height*PLATE_HEIGHT-PLATE_HEIGHT-WALL_THICKNESS-STUD_HEIGHT)/2)])
+					cube([SUPPORT_THICKNESS,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT-STUD_HEIGHT*1.4*WALL_THICKNESS],center = true);
 			}
-			for (y = [((degrees<=180)?0:-outer_radius):outer_radius]){		
-				translate([0,y*BRICK_WIDTH,STUD_HEIGHT*1.4])
-					cube([outer_radius*2*BRICK_WIDTH,SUPPORT_THICKNESS,height*PLATE_HEIGHT-STUD_HEIGHT*1.4],center=false);
+			for (y = [-outer_radius:outer_radius]){
+				translate([-WALL_THICKNESS,y*BRICK_WIDTH,STUD_HEIGHT*1.4+((height*PLATE_HEIGHT-PLATE_HEIGHT-WALL_THICKNESS-STUD_HEIGHT)/2)])
+					cube([outer_radius*2*BRICK_WIDTH,SUPPORT_THICKNESS,height*PLATE_HEIGHT-WALL_THICKNESS-STUD_HEIGHT*1.4],center = true);
 			}
 
 			// Antistud cylinders
@@ -198,72 +190,3 @@ module oldHollowOutAntistuds (outer_radius=2,inner_radius=1,height=3,degrees=360
 		}
 }		
 
-
-// module round_brick
-//
-// create a circular lego brick 
-
-module oldRoundBrick(length = 4, width = 2, height = 3, radius = 2, inner_radius = 1, studstyle = 1,degrees=360) {
-
-	// Round the x and y corners of the brick
-	difference() {
-		union() {  // Circle , Outer Wall, INner Wall
-			intersection() {
-				// Combine a brick with circle 
-				brick(length,width,height,studstyle);
-				translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
-					linear_extrude(height*2*PLATE_HEIGHT) {
-						circle(radius*BRICK_WIDTH);
-					}
-
-				}
-			}
-			// Make Walls for 1/2 and 1/4 circles
-			if(degrees<=180) {
-				translate([0,length*BRICK_WIDTH/2,0])
-					cube([length*BRICK_WIDTH,WALL_THICKNESS,height*PLATE_HEIGHT]);
-				if(degrees==90) {
-					translate([width*BRICK_WIDTH/2,0,0])
-						cube([WALL_THICKNESS,width*BRICK_WIDTH,height*PLATE_HEIGHT]);
-				}
-			}
-
-			// Outer Wall
-			translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
-				linear_extrude(height*PLATE_HEIGHT) {
-					difference() {
-						circle(radius*BRICK_WIDTH);
-						circle((radius*BRICK_WIDTH)-WALL_THICKNESS);
-					}
-
-				}
-			}
-			// Inner Wall
-			translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,0]) {
-				linear_extrude(height*PLATE_HEIGHT) {
-					difference() {
-						circle(inner_radius*BRICK_WIDTH+WALL_THICKNESS);
-						circle(inner_radius*BRICK_WIDTH);
-					}
-
-				}
-			}
-		}
-		// Inner Radius Cutout
-		translate([length*BRICK_WIDTH/2,width*BRICK_WIDTH/2,-CORRECTION]) {
-			linear_extrude(height*1.2*PLATE_HEIGHT+CORRECTION) {
-				circle(inner_radius*BRICK_WIDTH);
-			}
-		}
-		// Cut circle into 1/2 and 1/4
-		if(degrees <= 180) {
-			cube([length*BRICK_WIDTH,width*BRICK_WIDTH/2,height*1.2*PLATE_HEIGHT]);
-			if(degrees == 90) { 
-				cube([length*BRICK_WIDTH/2,width*BRICK_WIDTH,height*1.2*PLATE_HEIGHT]);
-			}
-		}
-		// Make Anti Studs that break the Inner and Outer Walls
-		make_studs(length,width,height,studstyle=4);	
-	}
-
-}

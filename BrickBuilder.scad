@@ -27,7 +27,7 @@ include <RoundBrickBuilder.scad>;
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-roundBrick(5,4,3,topstyle=0,degrees=180);
+roundBrick(5,3,6,topstyle=0,degrees=180);
 //
 
 //reducerBrick(5,4,3,degrees=90);
