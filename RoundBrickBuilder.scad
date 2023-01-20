@@ -7,7 +7,7 @@ Make Round Bricks for 3d printing that are compatible with LEGO brands bricks.
 
 
 
-module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,topstyle=0,degrees=360) {
+module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,topstyle=3,degrees=360, reduce=0) {
 
 	// roundBrick - build a round toy brick
 	// 
@@ -18,22 +18,33 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 			union() {  
 				// Draw side walls and top of the building brick
 			 	difference() {
-					rotate_extrude(angle=degrees)
-						translate([(inner_radius+0.01)*BRICK_WIDTH,0,0])
+					rotate_extrude(angle=degrees,convexity=10)
+						translate([(inner_radius+0.01)*BRICK_WIDTH,0,0.01])
 							difference() {
-								if(topstyle == 1) { // Reducer
+								if(reduce > 0) { // Reducer
 									polygon([[0,0],[0,height*PLATE_HEIGHT],
-										[(outer_radius-inner_radius-0.02)*BRICK_WIDTH,PLATE_HEIGHT],
-										[(outer_radius-inner_radius-0.02)*BRICK_WIDTH,0]]);
+										[((outer_radius-inner_radius-reduce)*BRICK_WIDTH)-0.02,height*PLATE_HEIGHT],
+										[((outer_radius-inner_radius)*BRICK_WIDTH)-0.02,PLATE_HEIGHT],
+										[((outer_radius-inner_radius)*BRICK_WIDTH)-0.02,0]]);
+									echo([[0,0],[0,height*PLATE_HEIGHT],
+										[(outer_radius-inner_radius-reduce)*BRICK_WIDTH,height*PLATE_HEIGHT],
+										[(outer_radius-inner_radius)*BRICK_WIDTH,PLATE_HEIGHT],
+										[(outer_radius-inner_radius)*BRICK_WIDTH,0],[0,0]]);
 								} else {
 									square([(outer_radius-inner_radius-0.02)*BRICK_WIDTH,height*PLATE_HEIGHT]);
 								}
 								translate([WALL_THICKNESS,0,0])
-									if(topstyle == 1) { // Reducer
+									if(reduce > 0) { // Reducer
 										polygon([[0,0],
+												[0,height*PLATE_HEIGHT-WALL_THICKNESS],
+												[((outer_radius-inner_radius-reduce)*BRICK_WIDTH-WALL_THICKNESS)-0.02,height*PLATE_HEIGHT-WALL_THICKNESS],
+												[((outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2)-0.02,PLATE_HEIGHT],
+												[((outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2)-0.02,0]]);
+										echo([[0,0],
 												[0,height*PLATE_HEIGHT-PLATE_HEIGHT],
-												[(outer_radius-inner_radius-0.02)*BRICK_WIDTH-WALL_THICKNESS*2,PLATE_HEIGHT],
-												[(outer_radius-inner_radius-0.02)*BRICK_WIDTH-WALL_THICKNESS*2,0]]);
+												[(outer_radius-inner_radius-reduce)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT],
+												[(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,PLATE_HEIGHT],
+												[(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,0],[0,0]]);
 									} else {
 										square([(outer_radius-inner_radius-0.02)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT-WALL_THICKNESS/2]);					
 									}
@@ -56,12 +67,18 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 				}
 			}
 				// Intersect to cut studs that stick are part on / part off the circle
-			rotate_extrude(angle=degrees)
+			rotate_extrude(angle=degrees,convexity=10)
 				translate([(inner_radius+.01)*BRICK_WIDTH,0,0])
-				if(topstyle == 1) { // Reducer
-					polygon([[0,0],[0,height*PLATE_HEIGHT],
-						[(outer_radius-inner_radius-0.02)*BRICK_WIDTH,PLATE_HEIGHT],
-						[(outer_radius-inner_radius-0.02)*BRICK_WIDTH,0]]);
+				if(reduce > 0) { // Reducer
+					polygon([[0,0],[0,height*PLATE_HEIGHT+PLATE_HEIGHT],
+						[(outer_radius-inner_radius-reduce)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
+						[(outer_radius-inner_radius-reduce)*BRICK_WIDTH,height*PLATE_HEIGHT],
+						[(outer_radius-inner_radius)*BRICK_WIDTH,PLATE_HEIGHT],
+						[(outer_radius-inner_radius)*BRICK_WIDTH,0],[0,0]]);
+					echo([[0,0],[0,height*PLATE_HEIGHT],
+						[(outer_radius-inner_radius-topstyle+1)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
+						[(outer_radius-inner_radius)*BRICK_WIDTH,PLATE_HEIGHT],
+						[(outer_radius-inner_radius)*BRICK_WIDTH,0],[0,0]]);
 				} else {
 					square([(outer_radius-inner_radius-.02)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2]);
 				}
