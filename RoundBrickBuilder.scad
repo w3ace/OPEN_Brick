@@ -7,7 +7,7 @@ Make Round Bricks for 3d printing that are compatible with LEGO brands bricks.
 
 
 
-module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,topstyle=3,degrees=360, reduce=0) {
+module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,topstyle=3,degrees=360, reduce=0,window=0) {
 
 	// roundBrick - build a round toy brick
 	// 
@@ -18,34 +18,25 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 			union() {  
 				// Draw side walls and top of the building brick
 			 	difference() {
-					rotate_extrude(angle=degrees,convexity=10)
+					rotate_extrude(angle=degrees,convexity=10) // Take Polygon from below and build 3d circular shape
 						translate([(inner_radius+0.01)*BRICK_WIDTH,0,0.01])
 							difference() {
-								if(reduce > 0) { // Reducer
+								if(reduce > 0) { // Reducer Polygon
 									polygon([[0,0],[0,height*PLATE_HEIGHT],
 										[((outer_radius-inner_radius-reduce)*BRICK_WIDTH)-0.02,height*PLATE_HEIGHT],
 										[((outer_radius-inner_radius)*BRICK_WIDTH)-0.02,PLATE_HEIGHT],
 										[((outer_radius-inner_radius)*BRICK_WIDTH)-0.02,0]]);
-									echo([[0,0],[0,height*PLATE_HEIGHT],
-										[(outer_radius-inner_radius-reduce)*BRICK_WIDTH,height*PLATE_HEIGHT],
-										[(outer_radius-inner_radius)*BRICK_WIDTH,PLATE_HEIGHT],
-										[(outer_radius-inner_radius)*BRICK_WIDTH,0],[0,0]]);
-								} else {
+								} else { // Regular Brick Circle - Rectangle
 									square([(outer_radius-inner_radius-0.02)*BRICK_WIDTH,height*PLATE_HEIGHT]);
 								}
 								translate([WALL_THICKNESS,0,0])
-									if(reduce > 0) { // Reducer
+									if(reduce > 0) { // Reducer Polygon
 										polygon([[0,0],
 												[0,height*PLATE_HEIGHT-WALL_THICKNESS],
 												[((outer_radius-inner_radius-reduce)*BRICK_WIDTH-WALL_THICKNESS)-0.02,height*PLATE_HEIGHT-WALL_THICKNESS],
 												[((outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2)-0.02,PLATE_HEIGHT],
 												[((outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2)-0.02,0]]);
-										echo([[0,0],
-												[0,height*PLATE_HEIGHT-PLATE_HEIGHT],
-												[(outer_radius-inner_radius-reduce)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT],
-												[(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,PLATE_HEIGHT],
-												[(outer_radius-inner_radius)*BRICK_WIDTH-WALL_THICKNESS*2,0],[0,0]]);
-									} else {
+									} else {  // rectangle brick body 
 										square([(outer_radius-inner_radius-0.02)*BRICK_WIDTH-WALL_THICKNESS*2,height*PLATE_HEIGHT-WALL_THICKNESS/2]);					
 									}
 							}
@@ -65,6 +56,11 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 							cube([WALL_THICKNESS*2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
 					}
 				}
+
+				if (window) {  // Windows
+					makeWindow(outer_radius,inner_radius,height,degrees,window,1);
+				}
+
 			}
 				// Intersect to cut studs that stick are part on / part off the circle
 			rotate_extrude(angle=degrees,convexity=10)
@@ -72,9 +68,9 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 				if(reduce > 0) { // Reducer
 					polygon([[0,0],[0,height*PLATE_HEIGHT+PLATE_HEIGHT],
 						[(outer_radius-inner_radius-reduce)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
-						[(outer_radius-inner_radius-reduce)*BRICK_WIDTH,height*PLATE_HEIGHT],
-						[(outer_radius-inner_radius)*BRICK_WIDTH,PLATE_HEIGHT],
-						[(outer_radius-inner_radius)*BRICK_WIDTH,0],[0,0]]);
+										[((outer_radius-inner_radius-reduce)*BRICK_WIDTH)-0.02,height*PLATE_HEIGHT],
+										[((outer_radius-inner_radius)*BRICK_WIDTH)-0.02,PLATE_HEIGHT],
+										[((outer_radius-inner_radius)*BRICK_WIDTH)-0.02,0]]);
 					echo([[0,0],[0,height*PLATE_HEIGHT],
 						[(outer_radius-inner_radius-topstyle+1)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
 						[(outer_radius-inner_radius)*BRICK_WIDTH,PLATE_HEIGHT],
@@ -84,15 +80,44 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 				}
 		}
 
-		// Cut back a small bit of the 90 and 180 brick straight ends to account for 3d printing error	
-		if(degrees<=180) {
-			translate([-outer_radius*BRICK_WIDTH,0,0])
-				cube([outer_radius*2*BRICK_WIDTH,WALL_THICKNESS*.2,height*PLATE_HEIGHT]);
-				if(degrees==90) {
-					translate([0,-outer_radius*BRICK_WIDTH,0])
-						cube([WALL_THICKNESS*.2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
+		union() {
+			if(window) {
+				makeWindow(outer_radius,inner_radius,height,degrees,window);
+			}
+
+			// Cut back a small bit of the 90 and 180 brick straight ends to account for 3d printing error	
+			if(degrees<=180) {
+				translate([-outer_radius*BRICK_WIDTH,0,0])
+					cube([outer_radius*2*BRICK_WIDTH,WALL_THICKNESS*.2,height*PLATE_HEIGHT]);
+					if(degrees==90) {
+						translate([0,-outer_radius*BRICK_WIDTH,0])
+							cube([WALL_THICKNESS*.2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
+				}
 			}
 		}
+	}
+}
+
+
+module makeWindow(outer_radius=2,inner_radius=1,height=3,degrees=360,window=1,frame=0) {
+
+	windows = round(inner_radius*5*(degrees/360));
+	zoff = height*PLATE_HEIGHT*.3;
+
+	for (i = [(degrees/windows)/2:degrees/windows:degrees]) {
+		echo (i,windows);
+		translate([0,0,zoff*1.6])
+			rotate([-i,90,0]) 
+				linear_extrude(outer_radius*BRICK_WIDTH)
+					if(frame) {
+						polygon([[zoff-WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS],
+							[-zoff*1.2-WALL_THICKNESS,0],[-zoff-WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],
+							[zoff+WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],[zoff+WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS]]);
+					} else {
+						polygon([[-zoff,-PLATE_HEIGHT],[-zoff*1.2,0],[-zoff,PLATE_HEIGHT],
+							[zoff,PLATE_HEIGHT],[zoff,-PLATE_HEIGHT]]);
+					}
+//					square([PLATE_HEIGHT*3,PLATE_HEIGHT*2],center=true);	
 	}
 }
 

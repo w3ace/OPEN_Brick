@@ -21,13 +21,19 @@ include <RoundBrickBuilder.scad>;
 
 
  // this is it:
- color("green") 
+ color("gray") 
  //brick(1,6,3);
  //
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-roundBrick(3,0,9,reduce=2,degrees=360);
+roundBrick(
+    outer_radius=6,
+    inner_radius=5,
+    height=18,
+    degrees=90,
+    window=1
+    );
 //
 
 //reducerBrick(5,4,3,degrees=90);
