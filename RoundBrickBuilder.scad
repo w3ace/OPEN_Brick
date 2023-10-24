@@ -56,9 +56,11 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 							cube([WALL_THICKNESS*2,outer_radius*2*BRICK_WIDTH,height*PLATE_HEIGHT]);
 					}
 				}
-
-				if (window) {  // Windows
-					makeWindow(outer_radius,inner_radius,height,degrees,window,1);
+echo (window);
+				if (window ==1 ) {  // Windows
+					makeCathedralWindows(outer_radius,inner_radius,height,degrees,window,1);
+				} else {	
+			//		makeArcherWindows(outer_radius,inner_radius,height,degrees,window,1);					
 				}
 
 			}
@@ -81,9 +83,11 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 		}
 
 		union() {
-			if(window) {
-				makeWindow(outer_radius,inner_radius,height,degrees,window);
-			}
+			if(window ==1) {
+				makeCathedralWindows(outer_radius,inner_radius,height,degrees,window);
+				} else {
+		//			makeArcherWindows(outer_radius,inner_radius,height,degrees,window);					
+				}
 
 			// Cut back a small bit of the 90 and 180 brick straight ends to account for 3d printing error	
 			if(degrees<=180) {
@@ -99,7 +103,10 @@ module roundBrick(outer_radius = 2, inner_radius = 1, height = 3, studstyle = 1,
 }
 
 
-module makeWindow(outer_radius=2,inner_radius=1,height=3,degrees=360,window=1,frame=0) {
+module makeBattlements(outer_radius=2,inner_radius=1,height=3,degrees=360,window=1,frame=0) {
+}
+
+module makeArcherWindows(outer_radius=2,inner_radius=1,height=3,degrees=360,window=1,frame=0) {
 
 	windows = round(inner_radius*5*(degrees/360));
 	zoff = height*PLATE_HEIGHT*.3;
@@ -108,12 +115,34 @@ module makeWindow(outer_radius=2,inner_radius=1,height=3,degrees=360,window=1,fr
 		echo (i,windows);
 		translate([0,0,zoff*1.6])
 			rotate([-i,90,0]) 
-				linear_extrude(outer_radius*BRICK_WIDTH)
-					if(frame) {
-						polygon([[zoff-WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS],
+				linear_extrude(height=outer_radius*BRICK_WIDTH,scale=[1,.1,1])
+					if(frame) {  // frame around window
+						polygon([[-zoff-WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS],
 							[-zoff*1.2-WALL_THICKNESS,0],[-zoff-WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],
 							[zoff+WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],[zoff+WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS]]);
-					} else {
+					} else { 
+						polygon([[-zoff,-PLATE_HEIGHT],[-zoff*1.2,0],[-zoff,PLATE_HEIGHT],
+							[zoff,PLATE_HEIGHT],[zoff,-PLATE_HEIGHT]]);
+					}
+//					square([PLATE_HEIGHT*3,PLATE_HEIGHT*2],center=true);	
+	}
+}
+
+module makeCathedralWindows(outer_radius=2,inner_radius=1,height=3,degrees=360,window=1,frame=0) {
+
+	windows = round(inner_radius*5*(degrees/360));
+	zoff = height*PLATE_HEIGHT*.3;
+
+	for (i = [(degrees/windows)/2:degrees/windows:degrees]) {
+		echo (i,windows);
+		translate([0,0,zoff*1.6])
+			rotate([-i,90,0]) 
+				linear_extrude(height=outer_radius*BRICK_WIDTH,scale=[1,1.4,1])
+					if(frame) {  // frame around window
+						polygon([[-zoff-WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS],
+							[-zoff*1.2-WALL_THICKNESS,0],[-zoff-WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],
+							[zoff+WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],[zoff+WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS]]);
+					} else { 
 						polygon([[-zoff,-PLATE_HEIGHT],[-zoff*1.2,0],[-zoff,PLATE_HEIGHT],
 							[zoff,PLATE_HEIGHT],[zoff,-PLATE_HEIGHT]]);
 					}

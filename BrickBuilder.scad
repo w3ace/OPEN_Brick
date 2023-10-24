@@ -10,6 +10,19 @@
  Height is in flat brick heights, so for a normal lego brick height = 3.
  Add optional smooth = true for a brick without studs. 
  Use height = 0 to just put studs/knobs on top of other things.
+
+
+  roundBrick usage
+
+  outer_radius = 2, // outside ring in lego stud increments
+  inner_radius = 1,  // inner ring in lego stud increments 
+  height = 3,           // height of brick in standard LEGO units 
+  studstyle = 1,        // stud is hollow = 0 or filled =1 
+  topstyle=3,           // topstyle 
+  degrees=360,          // length of round block arc in degrees
+  reduce=0,
+  window=0 
+
 */
 $fn = 100;
 
@@ -28,13 +41,15 @@ include <RoundBrickBuilder.scad>;
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
 roundBrick(
-    outer_radius=6,
-    inner_radius=5,
-    height=18,
+    outer_radius=7,
+    inner_radius=4,
+    height=6,
     degrees=90,
-    window=1
+    topstyle = 3,
+    window=0
     );
-//
+// 
+
 
 //reducerBrick(5,4,3,degrees=90);
 
