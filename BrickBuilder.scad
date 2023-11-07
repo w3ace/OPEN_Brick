@@ -24,7 +24,7 @@
   window=0 
 
 */
-$fn = 100;
+$fn = 200;
 
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
@@ -34,20 +34,39 @@ include <RoundBrickBuilder.scad>;
 
 
  // this is it:
- color("gray") 
  //brick(1,6,3);
  //
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-roundBrick(
-    outer_radius=7,
-    inner_radius=4,
-    height=6,
-    degrees=90,
-    topstyle = 3,
-    window=0
-    );
+outer_radius=2;
+inner_radius=0;
+// Negate Reduction is Increase
+reduce = 0;
+height=3;
+
+degrees_start = 0;
+degrees_end = 360;
+
+thinwall = 0;
+window= 0;
+chamfer =0;
+
+ color("gray")
+    roundBrick(
+
+        outer_radius,
+        inner_radius,
+        reduce,
+        height,
+      
+        degrees_start,
+        degrees_end,
+
+        thinwall,
+        window,
+        chamfer    );
+
 // 
 
 
