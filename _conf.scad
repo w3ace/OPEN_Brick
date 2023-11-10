@@ -15,7 +15,7 @@ STUD_RADIUS = 1.5 *FLU;  	// studs are the small cylinders on top of the brick
 STUD_HEIGHT = FLU*1.4; 
 BRICK_BOTTOM = FLU*1.6;
 
-ANTI_STUD_RADIUS = 1.95*FLU;    // an anti stud is the hollow cylinder inside 
+ANTI_STUD_RADIUS = 2*FLU;    // an anti stud is the hollow cylinder inside 
                                     // bricks that have length > 1 and width > 1
 PIN_RADIUS = FLU;           // a pin is the small cylinder inside bricks that have length = 1 or width = 1
 SUPPORT_THICKNESS = 0.8;    // SUPPORT_THICKNESS: support is the thin surface between anti studs, 

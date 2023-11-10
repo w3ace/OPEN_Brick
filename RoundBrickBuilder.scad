@@ -7,12 +7,14 @@ Make Round Bricks for 3d printing that are compatible with LEGO brands bricks.
 
 
 
-module roundBrick(outer_radius = 2, inner_radius = 1, reduce=0, height = 3, degrees_start=10,degrees_end=360,thinwall=0,window=0,chamfer=0) {
+module roundBrick(outer_radius = 2, inner_radius = 1, reduce=0, height = 3, degrees_start=10,degrees_end=360,thinwall=0,window=0,chamfer=0,supports=0) {
 
 	// roundBrick - build a round toy brick
 	// 
 	//  outer_radius, inner_radius-			Number of studs wide the outer circle and inner circle will be
 	//  
+
+echo ("SUPPORT",supports);
 
 		brick_polygon = (reduce>0) ? [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT], 
 										[((outer_radius-inner_radius-reduce)*BRICK_WIDTH),height*PLATE_HEIGHT],
@@ -20,9 +22,13 @@ module roundBrick(outer_radius = 2, inner_radius = 1, reduce=0, height = 3, degr
 										[((outer_radius-inner_radius)*BRICK_WIDTH),BRICK_BOTTOM],[0,BRICK_BOTTOM]]
 						: (reduce < 0) ? [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT],
 										[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT],
-										[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT-(PLATE_HEIGHT*.3)],
-										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),PLATE_HEIGHT],
-										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM],[0,BRICK_BOTTOM]]
+										// Drop the outer edge of the polygon for battlements
+										[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT-PLATE_HEIGHT*((supports>0) ? supports : .3)],
+										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM*((supports>0)?1:1)],
+										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM],
+
+
+										[0,BRICK_BOTTOM]]
 						:	[[0,BRICK_BOTTOM],
 										[0,height*PLATE_HEIGHT],
 										[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT],
@@ -36,58 +42,67 @@ module roundBrick(outer_radius = 2, inner_radius = 1, reduce=0, height = 3, degr
 										[((outer_radius-inner_radius)*BRICK_WIDTH),0],[0,0]]
 								: (reduce < 0) ?	[[0,0],[0,height*PLATE_HEIGHT+PLATE_HEIGHT],
 										[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
-										[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT],
-										[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT-(PLATE_HEIGHT*.3)],
-										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),PLATE_HEIGHT],
+										[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT+PLATE_HEIGHT],
+										[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT-PLATE_HEIGHT*((supports>0) ? supports : .3)],
+										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM*((supports>0)?1:1)],
 										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),0],[0,0]]
 								: [[0,0],[0,height*PLATE_HEIGHT*1.2],
 									[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2],
 										[(outer_radius-inner_radius)*BRICK_WIDTH,0],
 										[0,0]]			;	
 
-		thinwall_polygon = [[0,BRICK_BOTTOM],[0,(height*PLATE_HEIGHT)-WALL_THICKNESS],
-										[((outer_radius-inner_radius)*BRICK_WIDTH)-WALL_THICKNESS,height*PLATE_HEIGHT-(outer_radius-inner_radius)*BRICK_WIDTH*.95],
-										[((outer_radius-inner_radius)*BRICK_WIDTH)-WALL_THICKNESS,(outer_radius-inner_radius)*BRICK_WIDTH*0.55],
-												[0,BRICK_BOTTOM]]			;	
+		thinwall_polygon = [[-.1,BRICK_BOTTOM+WALL_THICKNESS/3],[-.1,(height*PLATE_HEIGHT)-WALL_THICKNESS],
+										[((outer_radius-inner_radius-abs(reduce))*BRICK_WIDTH)-WALL_THICKNESS,height*PLATE_HEIGHT-(outer_radius-inner_radius)*BRICK_WIDTH*0.6],
+										[((outer_radius-inner_radius-abs(reduce))*BRICK_WIDTH)-WALL_THICKNESS,BRICK_BOTTOM+WALL_THICKNESS/3],				
+										[-.1,BRICK_BOTTOM+WALL_THICKNESS/3]]			;	
 		bottom_polygon = [[0,0],[0,BRICK_BOTTOM],
 										[(outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH,BRICK_BOTTOM],
 										[(outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH,0], [0,0]
 					];
 
-		bottom_difference_polygon = (inner_radius == 0) ? [[0,0],[0,BRICK_BOTTOM],
-										[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,BRICK_BOTTOM],
-										[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,0], [0,0]]
+		bottom_difference_polygon = (inner_radius == 0) ? [[0,0],[0,BRICK_BOTTOM+.2],
+										[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,BRICK_BOTTOM+.2],
+										[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,-.1], [0,0]]
 
-									: [[WALL_THICKNESS,0],[WALL_THICKNESS,BRICK_BOTTOM],
-										[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,BRICK_BOTTOM],
+									: [[WALL_THICKNESS,0],[WALL_THICKNESS,BRICK_BOTTOM+.2],
+										[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,BRICK_BOTTOM+.2],
 										[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,0], [WALL_THICKNESS,0] ];
 
+		supports_difference_polygon = [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT*.65],
+										[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
+										[(outer_radius-inner_radius)*BRICK_WIDTH,BRICK_BOTTOM],
+										[0,BRICK_BOTTOM]];
 	difference() {
-
 		intersection() {  
+union() {
 			difference() {
+
+
+
 				union() {
 					// MAIN BRICK POLYGON
-					rotate_extrude(angle=degrees_end,convexity=10) // Take Polygon from below and build 3d circular shape
-						translate([(inner_radius+0.01)*BRICK_WIDTH,0,0.01])
-							polygon(brick_polygon);
+					rotate([0,0,degrees_start])
+						rotate_extrude(angle=degrees_end-degrees_start,convexity=10) // Take Polygon from below and build 3d circular shape
+							translate([inner_radius*BRICK_WIDTH,0,0])
+								polygon(brick_polygon);
 
+					// LOWER BRICK SHELL - Difference of two polygons.
 					difference() {
-						rotate_extrude(angle=degrees_end,convexity=10) // Take Polygon from below and build 3d circular shape
-							translate([(inner_radius+0.01)*BRICK_WIDTH,0,0.01])
-								polygon(bottom_polygon); 
-						rotate([0,0,degrees_start+((inner_radius != 0) ? 4 : 0)])
-							rotate_extrude(angle=degrees_end-degrees_start-((inner_radius != 0) ? 8 : 0),convexity=10) // Take Polygon from below and build 3d circular shape
-								translate([inner_radius*BRICK_WIDTH,0,0.01])
+						rotate([0,0,degrees_start])
+							rotate_extrude(angle=degrees_end-degrees_start,convexity=10) // Take Polygon from below and build 3d circular shape
+								translate([inner_radius*BRICK_WIDTH,0,0])
+									polygon(bottom_polygon); 
+						rotate([0,0,degrees_start+((degrees_start != 0 || degrees_end != 360) ? 4 : 0)])
+							rotate_extrude(angle=degrees_end-degrees_start-((degrees_start != 0 || degrees_end != 360) ? 8 : 0),convexity=10) // Take Polygon from below and build 3d circular shape
+								translate([inner_radius*BRICK_WIDTH,-.2,0])
 									polygon(bottom_difference_polygon);
-	}
-					
+
+					} 
+			//		echo (bottom_difference_polygon);
 						//  Add Studs on top of Brick where they belong
 						// Reduce here gets to actual rows of studs on top.
 						makeRoundStuds(outer_radius-reduce,inner_radius,height,1,degrees_end,degrees_start);
-						//  Add AntiStuds   Hollow Columns inside Building Brick
-						makeRoundAntistuds(outer_radius,inner_radius,height,degrees_end);
-
+		
 						if (window ==1 ) {  // Windows
 								makeCathedralWindows(outer_radius,inner_radius,height,degrees_start,degrees_end,window,1);
 							} else {	
@@ -99,25 +114,32 @@ module roundBrick(outer_radius = 2, inner_radius = 1, reduce=0, height = 3, degr
 				makeRoundStuds(outer_radius+1,inner_radius-1,0,4,degrees_end,degrees_start);
 			}
 
+
+				//  Add AntiStuds   Hollow Columns inside Building Brick
+						makeRoundAntistuds(outer_radius,inner_radius,height,degrees_end);
+					}
 			// Intersect to cut studs that stick are part on / part off the circle
+
 			rotate([0,0,degrees_start])
 				rotate_extrude(angle=degrees_end-degrees_start,convexity=10)
-					translate([(inner_radius)*BRICK_WIDTH,0,0])
+					translate([inner_radius*BRICK_WIDTH,0,0])
 						polygon(brick_intersect_polygon);
 
-		}
+		} 
 
-/*
 		union() {
 			if(window ==1) {
-					echo (degrees_end,degrees_start);
+			//		echo (degrees_end,degrees_start);
 					makeCathedralWindows(outer_radius,inner_radius,height,degrees_start,degrees_end,window);
 			} else {
 	//			makeArcherWindows(outer_radius,inner_radius,height,degrees_end,window);					
 			}
 
-			if (degrees_end != 360 || degrees_start != 0) {
-				// Trim a small amount for 3D printing corner bulge
+
+		// Trim a small amount for 3D printing corner bulge ( unless 360 degree brick )
+
+			if (degrees_end-degrees_start < 360) {
+
 				rotate([0,0,degrees_start])
 					cube([outer_radius*BRICK_WIDTH+.2,WALL_THICKNESS*.2,height*PLATE_HEIGHT+.2]);
 		
@@ -157,8 +179,26 @@ module roundBrick(outer_radius = 2, inner_radius = 1, reduce=0, height = 3, degr
 			}
 
 
+			// Supports cutouts
+			if(supports>0 && reduce<0) {
+				for(i=[6:30:360]) {
+					if ( i+30>=degrees_start && i-30 <= degrees_end) {
+							rotate([0,0,i])
+								rotate_extrude(angle=18,convexity=10)
+									translate([(outer_radius+reduce)*BRICK_WIDTH,0])
+										polygon(supports_difference_polygon);
+					}
 
-		}  */
+				
+
+				}
+
+
+			}
+
+
+
+		}  
 		
 	} 
 
@@ -172,10 +212,31 @@ module makeBattlements(outer_radius=2,inner_radius=1,height=3,degrees_end=360,wi
 module makeCathedralWindows(outer_radius=2,inner_radius=1,height=3,degrees_start=0,degrees_end,window=1,frame=0) {
 
 	zoff = round(height*PLATE_HEIGHT*.3);
-	echo("FFF___---->>> ", degrees_start, degrees_end);
+//	echo("FFF___---->>> ", degrees_start, degrees_end);
+
+
+
+    stained_glass_window_polygon = [[-PLATE_HEIGHT,PLATE_HEIGHT*1.5],[-PLATE_HEIGHT,PLATE_HEIGHT*height*.7],
+        [0,PLATE_HEIGHT*height*.85],[PLATE_HEIGHT,PLATE_HEIGHT*height*.7],
+        [PLATE_HEIGHT,PLATE_HEIGHT*1.5],[0,PLATE_HEIGHT*1.5]];
+
+//	stained_glass_window_polygon = [[0,PLATE_HEIGHT*1.5],[0,PLATE_HEIGHT*height*.6],
+//		[PLATE_HEIGHT*2,PLATE_HEIGHT*height*.7],[PLATE_HEIGHT*4,PLATE_HEIGHT*height*6],
+//		[PLATE_HEIGHT*4,PLATE_HEIGHT*1.5],[0,PLATE_HEIGHT*1.5]];
+
+
 
 	for (i = [(degrees_start+15):30:(degrees_end-15)]) {
-		echo (i,degrees_start,degrees_end,BRICK_WIDTH);
+
+
+rotate([0,0,i])
+    translate([inner_radius*BRICK_WIDTH-.2,0,0])
+        rotate([90,0,90])
+            linear_extrude( height=(outer_radius-inner_radius)*BRICK_WIDTH+.4,convexity = 10)
+            	polygon(stained_glass_window_polygon);
+
+
+/*		echo (i,degrees_start,degrees_end,BRICK_WIDTH);
 		translate([0,0,zoff*1.6])
 			rotate([round(-i),90,0]) 
 				linear_extrude(height=outer_radius*BRICK_WIDTH*1.1,scale=[1,1.2,1])
@@ -184,10 +245,12 @@ module makeCathedralWindows(outer_radius=2,inner_radius=1,height=3,degrees_start
 							[-zoff*1.2-WALL_THICKNESS,0],[-zoff-WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],
 							[zoff+WALL_THICKNESS,PLATE_HEIGHT+WALL_THICKNESS],[zoff+WALL_THICKNESS,-PLATE_HEIGHT-WALL_THICKNESS]]);
 					} else { 
+	//					polygon(stained_glass_window_polygon);
 						polygon([[-zoff,-PLATE_HEIGHT],[-zoff*1.2,0],[-zoff,PLATE_HEIGHT],
 							[zoff,PLATE_HEIGHT],[zoff,-PLATE_HEIGHT]]);
 					}
 //					square([PLATE_HEIGHT*3,PLATE_HEIGHT*2],center=true);	
+*/
 	}
 }
 
@@ -214,10 +277,10 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 	for (y = [((degrees_end<=180)?-.5:-outer_radius-.5):outer_radius-.5]){		
 		for (x = [((degrees_end<=90)?-.5:-outer_radius-.5):outer_radius-.5]){
 
-//echo(x,y,degrees_end,offset,atan2(y,x), ((atan2(y,x)+360)%360));
-			if((x*x+y*y <= ((outer_radius+((studstyle==4)?.5:0))*(outer_radius+((studstyle==4)?.5:0)))) //*4)/4) 
+			if( ( x*x+y*y <= ((outer_radius+((studstyle==4)?.5:0))*(outer_radius+((studstyle==4)?.5:0)))) //*4)/4) 
 				&& (x*x+y*y >= ((inner_radius-((studstyle==4)?.5:0))*(inner_radius-((studstyle==4)?.5:0))))
-				&& ((atan2(y,x)+360)%360) > offset-((studstyle==4)?5:0) && ((atan2(y,x)+360)%360) < degrees_end + ((studstyle==4)?5:0)
+				&& ((atan2(y,x)+360)%360) > offset-((studstyle==4)?5:0) // ((inner_radius == 0) ? -5 : 0))
+				 && ((atan2(y,x)+360)%360) < degrees_end + ((studstyle==4)?5:0)
 				) { //*4)/4)) {
 
 //echo("HIT ---->  ",x,y,degrees_end,offset,atan2(y,x)%360);
@@ -234,8 +297,8 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 					} else {
 						union() {
 						// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
-							cylinder(h=STUD_HEIGHT + ((studstyle==4) ? CORRECTION*1.3 : 0), 
-								r=STUD_RADIUS + ((studstyle==4) ? CORRECTION*.3 : 0));
+							cylinder(h=STUD_HEIGHT + ((studstyle==4) ? .1 : 0), 
+								r=STUD_RADIUS + ((studstyle==4) ? .15 : 0));
 				//			if (studstyle==4) { cylinder(h=PLATE_HEIGHT*0.3,r=STUD_RADIUS+.4); }
 						}
 
@@ -256,11 +319,23 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_end=360
 			// Antistud cylinders
 			for (y = [((degrees_end<=180)?0:-outer_radius):outer_radius]){		
 				for (x = [((degrees_end<=90)?0:-outer_radius):outer_radius]){
-					if ((x*x+y*y <= outer_radius*outer_radius*4/4) && (x*x+y*y >= inner_radius*inner_radius*4/4)) {
+
+
+		/*	if( ( x*x+y*y <= ((outer_radius+((studstyle==4)?.5:0))*(outer_radius+((studstyle==4)?.5:0)))) //*4)/4) 
+				&& (x*x+y*y >= ((inner_radius-((studstyle==4)?.5:0))*(inner_radius-((studstyle==4)?.5:0))))
+				 && ((atan2(y,x)+360)%360) >= degrees_start
+				 && ((atan2(y,x)+360)%360) <= degrees_end
+				) { */
+
+					if ((x*x+y*y <= outer_radius*outer_radius*4/4) 
+						&& (x*x+y*y >= inner_radius*inner_radius*4/4)
+						&& ((atan2(y,x)+360)%360) >= degrees_start
+						&& ((atan2(y,x)+360)%360) < degrees_end) {
 						translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
 							difference() {
-								cylinder (h=BRICK_BOTTOM+0.02, r = ANTI_STUD_RADIUS);
-								cylinder (h=BRICK_BOTTOM+0.12, r = ANTI_STUD_RADIUS-WALL_THICKNESS/2);
+								cylinder (h=BRICK_BOTTOM+.2, r = ANTI_STUD_RADIUS);
+								translate([0,0,-.2])
+									cylinder (h=BRICK_BOTTOM+.2, r = ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
 							}
 
 							//	cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/1.8);
