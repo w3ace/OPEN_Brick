@@ -41,7 +41,6 @@ echo ("SUPPORT",supports);
 										[((outer_radius-inner_radius)*BRICK_WIDTH),PLATE_HEIGHT],
 										[((outer_radius-inner_radius)*BRICK_WIDTH),0],[0,0]]
 								: (reduce < 0) ?	[[0,0],[0,height*PLATE_HEIGHT+PLATE_HEIGHT],
-										[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
 										[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT+PLATE_HEIGHT],
 										[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT-PLATE_HEIGHT*((supports>0) ? supports : .3)],
 										[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM*((supports>0)?1:1)],
