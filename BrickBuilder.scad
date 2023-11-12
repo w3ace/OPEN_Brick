@@ -24,7 +24,7 @@
   window=0 
 
 */
-$fn = 100;
+$fn = 200;
 
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
@@ -40,16 +40,16 @@ include <RoundBrickBuilder.scad>;
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
 outer_radius=6;
-inner_radius = 2;
+inner_radius = 3;
 // Negate Reduction is 1ease
-reduce = 2;
-height=3;
+reduce =1;
+height=3 ;
 
-degrees_start =67.5;
+degrees_start = 67.5;
 degrees_end = 112.5;
 supports = 0;
 thinwall = 0;
-window= 0;  
+window= 0; 
 chamfer =0;
 
   /*  stained_glass_window_polygon = [[-PLATE_HEIGHT,PLATE_HEIGHT*1.5],[-PLATE_HEIGHT,PLATE_HEIGHT*height*.6],
@@ -62,7 +62,7 @@ rotate([0,0,45])
         rotate([90,0,90])
             linear_extrude( height=(outer_radius-inner_radius)*BRICK_WIDTH,convexity = 10)
             polygon(stained_glass_window_polygon); */
-
+color("DarkKhaki") {
     roundBrick(
 
         outer_radius,
@@ -78,7 +78,7 @@ rotate([0,0,45])
         chamfer,
         supports
     );
-
+}
 // 
 
 
