@@ -69,22 +69,20 @@ module makeStuds (length,width,height,studstyle=1) {
 				// Studstyle 3 Technic style studs
 				if (studstyle == 3) {
 					difference(){
-						cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
+						cylinder(h=STUD_HEIGHT, r=STUD_RADIUS);
 						// Stud inner holes
-						translate([0,0,-CORRECTION])
-						cylinder(h=STUD_HEIGHT*2+CORRECTION,r=PIN_RADIUS);
+						cylinder(h=STUD_HEIGHT*2,r=PIN_RADIUS);
 					} 
 				} else if (studstyle == 2) {
 					// Half filled Stud
 					difference(){
-						cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
+						cylinder(h=STUD_HEIGHT, r=STUD_RADIUS);
 						// Stud inner holes
-						translate([0,0,-CORRECTION])
-							cylinder(h=0.5*STUD_HEIGHT+CORRECTION,r=PIN_RADIUS);
+							cylinder(h=0.5*STUD_HEIGHT,r=PIN_RADIUS);
 					}
 				} else if (studstyle >0) {
 					// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
-					cylinder(h=STUD_HEIGHT+((studstyle==4) ? CORRECTION*2 : CORRECTION), r=STUD_RADIUS+((studstyle==4) ? CORRECTION*.4 : 0));
+					cylinder(h=STUD_HEIGHT, r=STUD_RADIUS+((studstyle==4) ? .4 : 0));
 				}	
 
 		

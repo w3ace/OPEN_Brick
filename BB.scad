@@ -29,7 +29,6 @@ $fn = 150;
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
-
 // include <ReducerBrickBuilder.scad>;
 
 
@@ -40,25 +39,29 @@ include <RoundBrickBuilder.scad>;
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-outer_radius= 5;
-inner_radius = 4;
+outer_radius=4;
+inner_radius =3;
 // Negate Reduction is 1ease
 reduce =0;
-height=3;
+height=6;
 
-degrees_start = 60;
-degrees_end = 120;
+degrees_start = 0;
+degrees_end = 90    ;
 supports = 0;
 
-attributes = [["thinwall",0],["link",0],
-               ["archway",0],
-               ["flattop",0]];
+attributes = [["thinwall",0]];
+
 thinwall = 0;
 window= 0;
 chamfer =0;
 
-//translate([-BRICK_WIDTH,inner_radius*BRICK_WIDTH,0])
-//rectBrick(length=2,width=2,height=3);
+
+                            rotate([0,0,(degrees_end-degrees_start)/2+degrees_start])
+                                translate([inner_radius*BRICK_WIDTH,0])
+                                    rotate([0,90,0])
+                                        cylinder(h=(outer_radius-inner_radius)*BRICK_WIDTH+.2,r1=PLATE_HEIGHT, r2=PLATE_HEIGHT, center=true);
+/*
+
 
 color("DarkKhaki") {
     roundBrick(
@@ -76,6 +79,7 @@ color("DarkKhaki") {
     ); 
 }
 // 
+ */
 
 
 //reducerBrick(5,4,3,degrees=90);
