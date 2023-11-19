@@ -8,7 +8,7 @@
 FLU = 1.6; 					   // Fundamental Lego Unit = 1.6 mm
 BRICK_WIDTH = 5*FLU;    	   // basic brick width
 BRICK_HEIGHT = 6*FLU;   	   // basic brick height
-PLATE_HEIGHT = 2*FLU;   	// basic plate height
+PLATE_HEIGHT = 1.95*FLU;   	// basic plate height
 WALL_THICKNESS = 0.8*FLU;   	// outer wall of the brick
 STUD_RADIUS = 1.5 *FLU;  	// studs are the small cylinders on top of the brick 
 							// with the lego logo ('nopje' in Dutch)

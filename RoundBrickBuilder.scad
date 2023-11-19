@@ -178,7 +178,7 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 
 				        // Switch statement for different parameters
 				        if (name == "window") {
-								makeCathedralWindows(outer_radius,inner_radius,height,degrees_start,degrees_end,window);
+								makeCathedralWindows(outer_radius,inner_radius,height,degrees_start,degrees_end,value);
 						} else if (name == "chamfer") {
 							// Chamfer Corners TODO: Make a reduce Chamfer.  
 								//  TODO: Pass chamfer as depth of corner chop
@@ -209,11 +209,11 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 						} else if (name == "archway") {
 							rotate([0,0,(degrees_end-degrees_start)/2+degrees_start])
 								translate([inner_radius*BRICK_WIDTH+BRICK_WIDTH*.5,0])
-								 scale([1,1.5,height/2.3])
+								 scale([1,1.5,height*.35])
 									rotate([0,90,0])
-                                        cylinder(h=(outer_radius-inner_radius)*BRICK_WIDTH+BRICK_WIDTH,r1=PLATE_HEIGHT*1.7, r2=PLATE_HEIGHT*2, center=true);
-                        } else if (name == "link" && value > 0) {
-                        	echo ("LINK");
+                                        cylinder(h=(outer_radius-inner_radius)*BRICK_WIDTH+BRICK_WIDTH,
+                                        	r1=PLATE_HEIGHT*.96, r2=PLATE_HEIGHT*2.27, center=true);        
+                  		} else if (name == "link" && value > 0) {
 								translate([-round(value/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,-.1])
 									cube([value*BRICK_WIDTH-.6,2*BRICK_WIDTH-.6,height*PLATE_HEIGHT]);
 						}				
@@ -317,22 +317,22 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 
 //echo("HIT ---->  ",x,y,degrees_start,degrees_end,atan2(y,x)%360);
 
-				translate ([x*BRICK_WIDTH,y*BRICK_WIDTH,height*PLATE_HEIGHT-CORRECTION])
+				translate ([x*BRICK_WIDTH,y*BRICK_WIDTH,height*PLATE_HEIGHT-.1])
 					if (studstyle == 3) {
 					// Studstyle 3 Technic style studs
 						difference() {
-		 					cylinder(h=STUD_HEIGHT, r=STUD_RADIUS);
+		 					cylinder(h=STUD_HEIGHT+.1, r=STUD_RADIUS);
 							// Stud inner holes
-							translate([0,0,-CORRECTION])
-								cylinder(h=STUD_HEIGHT*2,r=PIN_RADIUS);
+							translate([0,0,0])
+								cylinder(h=STUD_HEIGHT+.3,r=PIN_RADIUS);
 						} 
 					} else {
-						union() {
+
 						// Fully Filled Stud - Generic - And  (studstyle == 4) - Antistud
-							cylinder(h=STUD_HEIGHT + ((studstyle==4) ? .1 : 0), 
+							cylinder(h=STUD_HEIGHT + ((studstyle==4) ? .3 : 0), 
 								r=STUD_RADIUS + ((studstyle==4) ? .15 : 0));
 				//			if (studstyle==4) { cylinder(h=PLATE_HEIGHT*0.3,r=STUD_RADIUS+.4); }
-						}
+						
 
 					}
 
@@ -361,7 +361,7 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_end=360
 							difference() {
 								cylinder (h=BRICK_BOTTOM+.2, r = ANTI_STUD_RADIUS);
 								translate([0,0,-.2])
-									cylinder (h=BRICK_BOTTOM+.2, r = ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
+									cylinder (h=BRICK_BOTTOM+.3, r = ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
 							}
 
 							//	cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/1.8);

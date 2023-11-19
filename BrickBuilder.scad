@@ -40,8 +40,8 @@ include <RoundBrickBuilder.scad>;
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-outer_radius= 5;
-inner_radius = 4;
+outer_radius= 4;
+inner_radius = 3;
 // Negate Reduction is 1ease
 reduce =0;
 height=3;
@@ -52,14 +52,15 @@ supports = 0;
 
 attributes = [["thinwall",0],["link",0],
                ["archway",0],
-               ["flattop",0]];
-thinwall = 0;
-window= 0;
-chamfer =0;
+               ["flattop",0],
+               ["window",0],
+               ["chamfer",0]];
 
+               
 //translate([-BRICK_WIDTH,inner_radius*BRICK_WIDTH,0])
 //rectBrick(length=2,width=2,height=3);
 
+// translate ([0,0,PLATE_HEIGHT*3])
 color("DarkKhaki") {
     roundBrick(
 
@@ -75,6 +76,25 @@ color("DarkKhaki") {
         attributes
     ); 
 }
+
+/*
+
+
+
+    roundBrick(
+
+        outer_radius=6,
+        inner_radius=2,
+        reduce=0,
+        height=3,
+      
+        degrees_start=0,
+        degrees_end =75,
+        supports=0,
+
+        attributes =["flattop",0]
+    ); 
+*/
 // 
 
 
