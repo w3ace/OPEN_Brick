@@ -106,7 +106,6 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 
 						}                        
 
-
 						// Bottom Carriage for Antistuds
 						if(degrees_start>0 || degrees_end<360) {
 							rotate([0,0,degrees_start])
@@ -150,8 +149,6 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 			//  Add AntiStuds   Hollow Columns inside Building Brick
 			makeRoundAntistuds(outer_radius,inner_radius,height,degrees_end);			
 		}
-
-
 
 
 		// Trim a small amount for 3D printing corner bulge ( unless 360 degree brick )
@@ -207,12 +204,40 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 											polygon(thinwall_polygon); 
 							            // Add more cases as needed
 						} else if (name == "archway") {
+
+							// Archway
+
+							angle_base_width = sin(value)*2;
+
+							angle_scale = (outer_radius+1)/(inner_radius-1);
+
 							rotate([0,0,(degrees_end-degrees_start)/2+degrees_start])
+                                translate([(inner_radius-1)*BRICK_WIDTH,0])
+                                    rotate([0,90,0])
+                                        linear_extrude(height=(outer_radius-inner_radius+2)*BRICK_WIDTH,scale=[1.2,angle_scale])
+                                            // Standard Arch
+                                         scale([height*.52*(15/value),1])
+                                              circle(angle_base_width/2*(inner_radius-1)*BRICK_WIDTH);
+
+                                            // Rounded Horseshoe
+                                   /*         scale([((height-1)*PLATE_HEIGHT)/(inner_radius*BRICK_WIDTH*.7),1])
+                                                union () {  
+                                                    translate([-PLATE_HEIGHT*3,0])
+                                                        circle(.33*(inner_radius-1)*BRICK_WIDTH);
+	                                               square([height*PLATE_HEIGHT*.6,angle_base_width*(inner_radius-1)*BRICK_WIDTH],center=true);
+
+	                                      
+                                                } */
+
+/*							rotate([0,0,(degrees_end-degrees_start)/2+degrees_start])
 								translate([inner_radius*BRICK_WIDTH+BRICK_WIDTH*.5,0])
 								 scale([1,1.5,height*.35])
 									rotate([0,90,0])
                                         cylinder(h=(outer_radius-inner_radius)*BRICK_WIDTH+BRICK_WIDTH,
                                         	r1=PLATE_HEIGHT*.96, r2=PLATE_HEIGHT*2.27, center=true);        
+*/
+
+
                   		} else if (name == "link" && value > 0) {
 								translate([-round(value/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,-.1])
 									cube([value*BRICK_WIDTH-.6,2*BRICK_WIDTH-.6,height*PLATE_HEIGHT]);
@@ -266,7 +291,16 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 						       if (name == "link" && value > 0) {
 									translate([-round(value/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,0])
 									rectBrick(length=value,width=2,height=height);
-								}
+												} else if (name == "archway") {
+
+							// Archway
+                   /*         rotate([0,0,(degrees_end-degrees_start)/2+degrees_start])
+                                translate([inner_radius*BRICK_WIDTH-.2,0])
+                                    rotate([0,90,0])
+		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH+BRICK_WIDTH,scale=[1,1.6])
+                                            circle(cos(75)*inner_radius*BRICK_WIDTH);
+                     */                   }
+
 						}
 
 
@@ -361,7 +395,7 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_end=360
 							difference() {
 								cylinder (h=BRICK_BOTTOM+.2, r = ANTI_STUD_RADIUS);
 								translate([0,0,-.2])
-									cylinder (h=BRICK_BOTTOM+.3, r = ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
+									cylinder (h=BRICK_BOTTOM+.4, r = ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
 							}
 
 							//	cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/1.8);

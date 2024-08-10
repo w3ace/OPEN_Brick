@@ -39,14 +39,14 @@ include <RoundBrickBuilder.scad>;
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-outer_radius=4;
+outer_radius=5;
 inner_radius =3;
 // Negate Reduction is 1ease
 reduce =0;
-height=6;
+height=4;
 
-degrees_start = 0;
-degrees_end = 90    ;
+degrees_start = 60;
+degrees_end = 120   ;
 supports = 0;
 
 attributes = [["thinwall",0]];
@@ -55,11 +55,15 @@ thinwall = 0;
 window= 0;
 chamfer =0;
 
+        scale([((height-1)*PLATE_HEIGHT)/(.7*inner_radius*BRICK_WIDTH),1])
+                                                union () {  
+                                          
+                                                    translate([-PLATE_HEIGHT*2.5,0])
+                                                        circle(.32*(inner_radius-1)*BRICK_WIDTH);
 
-                            rotate([0,0,(degrees_end-degrees_start)/2+degrees_start])
-                                translate([inner_radius*BRICK_WIDTH,0])
-                                    rotate([0,90,0])
-                                        cylinder(h=(outer_radius-inner_radius)*BRICK_WIDTH+.2,r1=PLATE_HEIGHT, r2=PLATE_HEIGHT, center=true);
+                                                    square([(inner_radius-1)*BRICK_WIDTH,.52*(inner_radius-1)*BRICK_WIDTH],center=true);
+                                                }
+
 /*
 
 
