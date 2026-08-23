@@ -4,9 +4,21 @@ Make Round Bricks for 3d printing that are compatible with LEGO brands bricks.
 
 */
 
+include <BrickFunctions.scad>;
+
 
 module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3, 
 						degrees_start=10, degrees_end=360,  supports=0, attributes = [] ) {
+
+	// Resolve the public attribute list once.  Previously the list was scanned
+	// three times while building the same brick, adding unnecessary CSG nodes
+	// and making the effects of each option harder to follow.
+	flattop = attributeValue(attributes, "flattop", 0);
+	window = attributeValue(attributes, "window", 0);
+	chamfer = attributeValue(attributes, "chamfer", 0);
+	thinwall = attributeValue(attributes, "thinwall", 0);
+	archway = attributeValue(attributes, "archway", 0);
+	link = attributeValue(attributes, "link", 0);
 
 
 //	thinwall=0, window=0,	chamfer=0,
@@ -126,15 +138,8 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 						//  Add Studs on top of Brick where they belong
 						//  Reduce here gets to actual rows of studs on top.
 
-						for (param = attributes) {
-					        name = param[0];
-					        value = param[1];
-
-						        // Switch statement for different parameters
-						        if (name == "flattop" && value == 0) {
-									makeRoundStuds(outer_radius-reduce,inner_radius,height,1,degrees_start,degrees_end);
-								} 
-						}
+						if (flattop == 0)
+							makeRoundStuds(outer_radius-reduce,inner_radius,height,1,degrees_start,degrees_end);
 
 
 					}
@@ -165,18 +170,12 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 			}
 
 
-			// Loop through block attributes looking for differences agains main block.
+			// Apply attribute-driven subtractions to the main block.
 
-			 for (param = attributes) {
-			        name = param[0];
-			        value = param[1];
+			if (window > 0)
+				makeCathedralWindows(outer_radius,inner_radius,height,degrees_start,degrees_end,window);
 
-			        if (value > 0) { 
-
-				        // Switch statement for different parameters
-				        if (name == "window") {
-								makeCathedralWindows(outer_radius,inner_radius,height,degrees_start,degrees_end,value);
-						} else if (name == "chamfer") {
+			if (chamfer > 0) {
 							// Chamfer Corners TODO: Make a reduce Chamfer.  
 								//  TODO: Pass chamfer as depth of corner chop
 
@@ -196,18 +195,22 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 									translate([outer_radius*BRICK_WIDTH,0,(height*PLATE_HEIGHT+PLATE_HEIGHT)/2]) 
 										rotate([0,0,45])
 											cube([WALL_THICKNESS,WALL_THICKNESS ,height*PLATE_HEIGHT+PLATE_HEIGHT],center = true);
-				        } else if (name == "thinwall") {
+			}
+
+			if (thinwall > 0) {
 							//  Hollow out Brick for thinwall design
 								rotate([0,0,degrees_start+5])
 									rotate_extrude(angle=degrees_end-degrees_start-10,convexity=10) // Take Polygon from below and build 3d circular shape
 										translate([(inner_radius)*BRICK_WIDTH,0])
 											polygon(thinwall_polygon); 
 							            // Add more cases as needed
-						} else if (name == "archway") {
+			}
+
+			if (archway > 0) {
 
 							// Archway
 
-							angle_base_width = sin(value)*2;
+							angle_base_width = sin(archway)*2;
 
 							angle_scale = (outer_radius+1)/(inner_radius-1);
 
@@ -216,7 +219,7 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
                                     rotate([0,90,0])
                                         linear_extrude(height=(outer_radius-inner_radius+2)*BRICK_WIDTH,scale=[1.2,angle_scale])
                                             // Standard Arch
-                                         scale([height*.52*(15/value),1])
+										 scale([height*.52*(15/archway),1])
                                               circle(angle_base_width/2*(inner_radius-1)*BRICK_WIDTH);
 
                                             // Rounded Horseshoe
@@ -238,12 +241,11 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 */
 
 
-                  		} else if (name == "link" && value > 0) {
-								translate([-round(value/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,-.1])
-									cube([value*BRICK_WIDTH-.6,2*BRICK_WIDTH-.6,height*PLATE_HEIGHT]);
-						}				
-					}
-			    }
+			}
+
+			if (link > 0)
+				translate([-round(link/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,-.1])
+					cube([link*BRICK_WIDTH-.6,2*BRICK_WIDTH-.6,height*PLATE_HEIGHT]);
 
 	
 
@@ -283,15 +285,11 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 		
 	} 
 
-			for (param = attributes) {
-					        name = param[0];
-					        value = param[1];
+			if (link > 0)
+				translate([-round(link/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,0])
+					rectBrick(length=link,width=2,height=height);
 
-						        // Switch statement for different parameters
-						       if (name == "link" && value > 0) {
-									translate([-round(value/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,0])
-									rectBrick(length=value,width=2,height=height);
-												} else if (name == "archway") {
+			if (archway > 0) {
 
 							// Archway
                    /*         rotate([0,0,(degrees_end-degrees_start)/2+degrees_start])
@@ -300,11 +298,6 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH+BRICK_WIDTH,scale=[1,1.6])
                                             circle(cos(75)*inner_radius*BRICK_WIDTH);
                      */                   }
-
-						}
-
-
-
 }
 
 
