@@ -14,7 +14,11 @@
  Add optional smooth = true for a brick without studs. 
  Use height = 0 to just put studs/knobs on top of other things.
 */
-$fn = 100;
+// Let OpenSCAD scale tessellation with the size of each curve.  A fixed $fn
+// makes tiny studs as expensive as a complete circular wall.
+$fn = 0;
+$fa = $preview ? 12 : 4;
+$fs = $preview ? 1 : 0.4;
 
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
