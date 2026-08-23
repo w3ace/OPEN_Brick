@@ -45,8 +45,8 @@ inner_radius =3;
 reduce =0;
 height=4;
 
-degrees_start = 60;
-degrees_end = 120   ;
+degrees_start = 0;
+degrees_end = 90;
 supports = 0;
 
 attributes = [["thinwall",0]];

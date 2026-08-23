@@ -28,6 +28,7 @@ $fn = 150;
 
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
+
 include <RoundBrickBuilder.scad>;
 
 // include <ReducerBrickBuilder.scad>;
@@ -40,18 +41,18 @@ include <RoundBrickBuilder.scad>;
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
-outer_radius= 5;
+outer_radius= 4;
 inner_radius =3;
 // Negate Reduction is 1ease
 reduce =0;
-height=6;
+height=3;
 
-degrees_start =45;
-degrees_end = 135;
+degrees_start =0;
+degrees_end = 90;
 supports = 0;
 
 attributes = [["thinwall",0],["link",0],
-               ["archway",30],
+               ["archway",0],
                ["flattop",0],
                ["window",0],
                ["chamfer",0]];

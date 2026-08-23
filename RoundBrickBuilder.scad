@@ -111,13 +111,13 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 							rotate([0,0,degrees_start])
 	                            translate([inner_radius*BRICK_WIDTH,0,0])
 	                            	rotate([0,90,0])
-		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH,convexity=10,)
+		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH,convexity=10)
 		                                    polygon([[0,0],[-BRICK_BOTTOM,0],[-BRICK_BOTTOM,WALL_THICKNESS],
 		                                        [0,WALL_THICKNESS],[0,0]]);
 							rotate([0,0,degrees_end])
 	                            translate([inner_radius*BRICK_WIDTH,0,0])
 	                            	rotate([0,90,0])
-		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH,convexity=10,)
+		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH,convexity=10)
 		                                    polygon([[0,0],[-BRICK_BOTTOM,0],[-BRICK_BOTTOM,-WALL_THICKNESS],
 		                                        [0,-WALL_THICKNESS],[0,0]]);
 
@@ -395,7 +395,7 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_end=360
 							difference() {
 								cylinder (h=BRICK_BOTTOM+.2, r = ANTI_STUD_RADIUS);
 								translate([0,0,-.2])
-									cylinder (h=BRICK_BOTTOM+.4, r = ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
+									cylinder (h=BRICK_BOTTOM+.4, r = ANTI_STUD_RADIUS-WALL_THICKNESS);
 							}
 
 							//	cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/1.8);
