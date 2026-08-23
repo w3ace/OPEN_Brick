@@ -148,7 +148,7 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 				}
 
 			//  Add AntiStuds   Hollow Columns inside Building Brick
-			makeRoundAntistuds(outer_radius,inner_radius,height,degrees_end);			
+			makeRoundAntistuds(outer_radius,inner_radius,height,degrees_start,degrees_end);
 		}
 
 
@@ -341,32 +341,24 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 	}
 }
 
-module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_end=360) {
+module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_start=0,degrees_end=360) {
 
 //	difference() {
 //		union() {
 
 
 
-			// Antistud cylinders
-			for (y = [((degrees_end<=180)?0:-outer_radius):outer_radius]){		
-				for (x = [((degrees_end<=90)?0:-outer_radius):outer_radius]){
-
-
-					if ((x*x+y*y <= outer_radius*(outer_radius+.4) )
-						&& (x*x+y*y >= inner_radius*inner_radius)
-						&& ((atan2(y,x)+360)%360) >= degrees_start -7
-						&& ((atan2(y,x)+360)%360) < degrees_end + 7) {
-						translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0])
-							difference() {
-								cylinder (h=BRICK_BOTTOM+.2, r = ANTI_STUD_RADIUS);
-								translate([0,0,-.2])
-									cylinder (h=BRICK_BOTTOM+.3, r = ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
-							}
-
-							//	cylinder (h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION, r = ANTI_STUD_RADIUS-WALL_THICKNESS/1.8);
-					}
-				}
+			// Perform one boolean subtraction for the complete set instead of one
+			// difference per antistud. This produces the same disjoint tubes but
+			// gives CGAL a much smaller CSG tree to evaluate.
+			difference() {
+				union()
+					_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
+						cylinder(h=BRICK_BOTTOM+.2, r=ANTI_STUD_RADIUS);
+				union()
+					_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
+						translate([0,0,-.2])
+							cylinder(h=BRICK_BOTTOM+.3, r=ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
 			}
 
 
@@ -398,6 +390,19 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_end=360
 
 }
 
+// Place children at each valid antistud location. Keeping the selection logic
+// in one module also prevents the outer and inner tube passes drifting apart.
+module _roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end) {
+	for (y = [((degrees_end<=180)?0:-outer_radius):outer_radius])
+		for (x = [((degrees_end<=90)?0:-outer_radius):outer_radius])
+			let(angle=(atan2(y,x)+360)%360)
+				if (x*x+y*y <= outer_radius*(outer_radius+.4)
+					&& x*x+y*y >= inner_radius*inner_radius
+					&& angle >= degrees_start-7
+					&& angle < degrees_end+7)
+					translate([x*BRICK_WIDTH,y*BRICK_WIDTH,0]) children();
+}
+
 
 module oldHollowOutAntistuds (outer_radius=2,inner_radius=1,height=3,degrees_end=360) {
 
@@ -423,4 +428,3 @@ module oldHollowOutAntistuds (outer_radius=2,inner_radius=1,height=3,degrees_end
 			}
 		}
 }		
-
