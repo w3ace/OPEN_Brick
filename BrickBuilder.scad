@@ -24,7 +24,12 @@
   window=0 
 
 */
-$fn = 150;
+// Keep curved parts responsive in the preview while retaining a smooth export.
+// Using a fixed $fn here made every small stud use 150 facets as well as the
+// large ring, which needlessly multiplied the cost of every boolean operation.
+$fn = 0;
+$fa = $preview ? 12 : 4;
+$fs = $preview ? 1 : 0.4;
 
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
@@ -108,4 +113,3 @@ color("DarkKhaki") {
 // module brick
 // 
 // create a lego brick length x width x height 
-
