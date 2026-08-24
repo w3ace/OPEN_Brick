@@ -71,12 +71,12 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 							[(outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH,0], 
 							[0,0]];
 
-		bottom_difference_polygon = (inner_radius == 0) ? [[0,0],[0,STUD_HEIGHT],
-							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT],
+		bottom_difference_polygon = (inner_radius == 0) ? [[0,0],[0,STUD_HEIGHT+.3],
+							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3],
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,-.1], [0,0]]
 
-					: [[WALL_THICKNESS,0],[WALL_THICKNESS,STUD_HEIGHT],
-							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT],
+					: [[WALL_THICKNESS,0],[WALL_THICKNESS,STUD_HEIGHT+.3],
+							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3],
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,0], [WALL_THICKNESS,0] ];
 
 		supports_difference_polygon = [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT*.65],
@@ -113,7 +113,7 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 										polygon(bottom_polygon); 
 							rotate([0,0,degrees_start])
 								rotate_extrude(angle=degrees_end-degrees_start,convexity=10) // Take Polygon from below and build 3d circular shape
-									translate([inner_radius*BRICK_WIDTH,-.2,0])
+									translate([inner_radius*BRICK_WIDTH,0,0])
 										polygon(bottom_difference_polygon);
 
 						}                        
@@ -383,8 +383,8 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_start=0
 				union()
 					_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
 						translate([0,0,-.2])
-							cylinder(h=BRICK_BOTTOM+.3, r=ANTI_STUD_RADIUS-WALL_THICKNESS*.6);
-
+							cylinder(h=BRICK_BOTTOM+.3, r=ANTI_STUD_RADIUS-(WALL_THICKNESS*0.6));
+//
 			}
 
 

@@ -47,10 +47,10 @@ include <RoundBrickBuilder.scad>;
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
 
 outer_radius= 4;
-inner_radius =3;
+inner_radius =1;
 // Negate Reduction is 1ease
 reduce =0;
-height=3;
+height=1;
 
 degrees_start =0;
 degrees_end = 90;
