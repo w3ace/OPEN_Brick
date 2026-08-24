@@ -54,13 +54,15 @@ height=3;
 
 degrees_start =0;
 degrees_end = 90;
-supports = 0;
-
 attributes = [["thinwall",0],["link",0],
                ["archway",0],
                ["flattop",0],
                ["window",0],
-               ["chamfer",0]];
+               ["chamfer",0],
+               ["corbels",0],
+               ["corbel_spacing",30],
+               ["corbel_width",12],
+               ["corbel_phase",6]];
 
                
 //translate([-BRICK_WIDTH,inner_radius*BRICK_WIDTH,0])
@@ -71,18 +73,14 @@ attributes = [["thinwall",0],["link",0],
   
 color("DarkKhaki") {
     roundBrick(
-
-        outer_radius,
-        inner_radius,
-        reduce,
-        height,
-      
-        degrees_start,
-        degrees_end,
-        supports,
-
-        attributes
-    ); 
+        outer_radius=outer_radius,
+        inner_radius=inner_radius,
+        reduce=reduce,
+        height=height,
+        degrees_start=degrees_start,
+        degrees_end=degrees_end,
+        attributes=attributes
+    );
 }
 
 /*
