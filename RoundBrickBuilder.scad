@@ -85,10 +85,18 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3],
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,0], [WALL_THICKNESS,0] ];
 
-		corbel_gap_polygon = [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT*.65],
-							[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
-							[(outer_radius-inner_radius)*BRICK_WIDTH,BRICK_BOTTOM],
-							[0,BRICK_BOTTOM]];
+		// Give the cutter a small overlap on every CSG boundary.  The old cutter
+		// shared its bottom and inner radial faces with the flare and extended a
+		// full annulus beyond it.  OpenSCAD's preview could consequently leave
+		// coincident fragments (and display the subtraction far outside the
+		// corbels).  A negative reduction makes the flare exactly -reduce studs
+		// deep, so limit the cutter to that region.
+		corbel_overlap = .01;
+		corbel_depth = -reduce*BRICK_WIDTH;
+		corbel_gap_polygon = [[-corbel_overlap,BRICK_BOTTOM-corbel_overlap],
+							[-corbel_overlap,height*PLATE_HEIGHT*.65],
+							[corbel_depth+corbel_overlap,height*PLATE_HEIGHT+PLATE_HEIGHT],
+							[corbel_depth+corbel_overlap,BRICK_BOTTOM-corbel_overlap]];
 
 		inner_difference_polygon = [[0,0],[0,height*PLATE_HEIGHT+PLATE_HEIGHT*2],
 							[BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT*2],
@@ -265,8 +273,13 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 				for(n=[first_gap:1:last_gap]) {
 					gap_start = corbel_phase+n*corbel_spacing;
 					if (gap_start < degrees_end && gap_start+corbel_gap > degrees_start) {
-							rotate([0,0,gap_start])
-								rotate_extrude(angle=corbel_gap,convexity=10)
+						// Clip boundary gaps to the requested arc.  Besides preserving
+						// clean end walls, this prevents misleading geometry outside a
+						// partial arc in OpenSCAD's fast preview.
+						clipped_gap_start = max(gap_start,degrees_start);
+						clipped_gap_end = min(gap_start+corbel_gap,degrees_end);
+							rotate([0,0,clipped_gap_start])
+								rotate_extrude(angle=clipped_gap_end-clipped_gap_start,convexity=10)
 									translate([(outer_radius+reduce)*BRICK_WIDTH,0])
 										polygon(corbel_gap_polygon);
 					}
