@@ -21,6 +21,7 @@ $fs = $preview ? 1 : 0.4;
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
+include <RoundBattlementBuilder.scad>;
 
 rectBrick(length=4, width=2, height=3, studstyle=1);
 
@@ -148,6 +149,44 @@ The former `supports` argument remains available as a deprecated fallback for
 
 Attributes affect only `roundBrick()`; rectangular bricks use `studstyle`
 instead.
+
+### Round battlements
+
+`roundBattlement()` creates a true crenellated parapet as a separate builder.
+It first constructs a complete annular `roundBrick()`, then subtracts radial
+crenel wedges from its upper half. The uncut lower half is therefore a
+continuous parapet base, while the alternating upper sections form merlons.
+Top studs are added before the subtraction, so only studs over surviving
+merlons remain.
+
+```scad
+include <_conf.scad>;
+include <RoundBattlementBuilder.scad>;
+
+roundBattlement(
+    outer_radius=7,
+    inner_radius=6,
+    height=6,
+    degrees_start=0,
+    degrees_end=90,
+    merlon_angle=12,
+    crenel_angle=10,
+    phase=0,
+    studs=true
+);
+```
+
+| Parameter | Default | Effect |
+| --- | ---: | --- |
+| `outer_radius` | `7` | Outer radius in stud pitches. |
+| `inner_radius` | `6` | Inner radius in stud pitches; must be smaller than `outer_radius`. |
+| `height` | `6` | Total merlon height in plate units. Crenels extend down to half this height. |
+| `degrees_start` | `0` | Starting angle of the arc. |
+| `degrees_end` | `90` | Ending angle; sweeps up to 360 degrees are supported. |
+| `merlon_angle` | `12` | Angular width of each raised merlon. |
+| `crenel_angle` | `10` | Angular width of each opening between merlons. |
+| `phase` | `0` | Pattern offset from `degrees_start`; zero starts the arc with a merlon. |
+| `studs` | `true` | Adds top studs on surviving merlons; `false` produces a smooth top. |
 
 ## Dimension and print tuning
 
