@@ -166,21 +166,34 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 				}
 
 			//  Add AntiStuds   Hollow Columns inside Building Brick
-			makeRoundAntistuds(outer_radius,inner_radius,height,degrees_start,degrees_end);
+			// Build the normal antistud grid, then clip its tubes to the actual
+			// lower footprint.  Selecting a smaller grid alone would lose useful
+			// partial tubes along the reduced edge; clipping retains those tubes
+			// without allowing the full-size grid to protrude past the base.
+			makeRoundAntistuds(outer_radius,inner_radius,height,degrees_start,degrees_end,
+				outer_radius+min(reduce,0));
 		}
 
 
 		// Trim a small amount for 3D printing corner bulge ( unless 360 degree brick )
 
 			if (degrees_end-degrees_start < 360) {
+				// Studs centred near an end face extend beyond the nominal annulus.
+				// Extend the end cutters radially past both faces so those small
+				// overhanging fragments are removed as well.
+				stud_trim_margin = STUD_RADIUS+.2;
+				stud_trim_inner = inner_radius*BRICK_WIDTH
+					-BRICK_WIDTH*((inner_radius==0)?0:.5)-stud_trim_margin;
+				stud_trim_length = (outer_radius-inner_radius)*BRICK_WIDTH
+					+BRICK_WIDTH*((inner_radius==0)?0:.5)+stud_trim_margin*2;
 
 				rotate([0,0,degrees_start])
-					translate([inner_radius*BRICK_WIDTH-BRICK_WIDTH*((inner_radius==0)?0:.5),-WALL_THICKNESS*9.8,-PLATE_HEIGHT])
-						cube([(outer_radius-inner_radius)*BRICK_WIDTH+BRICK_WIDTH*((inner_radius==0)?0:.5),WALL_THICKNESS*10,(height+2)*PLATE_HEIGHT+.2]);
+					translate([stud_trim_inner,-WALL_THICKNESS*9.8,-PLATE_HEIGHT])
+						cube([stud_trim_length,WALL_THICKNESS*10,(height+2)*PLATE_HEIGHT+.2]);
 		
 				rotate([0,0,degrees_end])
-					translate([inner_radius*BRICK_WIDTH-BRICK_WIDTH*((inner_radius==0)?0:.5),-WALL_THICKNESS*.2,-PLATE_HEIGHT])
-						cube([(outer_radius-inner_radius)*BRICK_WIDTH+BRICK_WIDTH*((inner_radius==0)?0:.5),WALL_THICKNESS*10,(height+2)*PLATE_HEIGHT]);
+					translate([stud_trim_inner,-WALL_THICKNESS*.2,-PLATE_HEIGHT])
+						cube([stud_trim_length,WALL_THICKNESS*10,(height+2)*PLATE_HEIGHT]);
 			}
 
 
@@ -389,7 +402,8 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 	}
 }
 
-module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_start=0,degrees_end=360) {
+module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_start=0,degrees_end=360,
+		trim_outer_radius=outer_radius) {
 
 //	difference() {
 //		union() {
@@ -397,16 +411,16 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_start=0
 			// Perform one boolean subtraction for the complete set instead of one
 			// difference per antistud. This produces the same disjoint tubes but
 			// gives CGAL a much smaller CSG tree to evaluate.
-			difference() {
-				union()
-					_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
-						cylinder(h=BRICK_BOTTOM+.2, r=ANTI_STUD_RADIUS);
-				union()
-					_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
-						translate([0,0,-.2])
-							cylinder(h=BRICK_BOTTOM+.3, r=ANTI_STUD_RADIUS-(WALL_THICKNESS*0.6));
-//
+			if (trim_outer_radius < outer_radius)
+			intersection() {
+				_roundAntistudTubes(outer_radius,inner_radius,degrees_start,degrees_end);
+				// The cutter follows the reduced lower radius while leaving a small
+				// vertical overlap to avoid coincident CSG faces at the base.
+				translate([0,0,-.01])
+					cylinder(h=BRICK_BOTTOM+.22,r=trim_outer_radius*BRICK_WIDTH);
 			}
+			else
+				_roundAntistudTubes(outer_radius,inner_radius,degrees_start,degrees_end);
 
 
 
@@ -435,6 +449,18 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_start=0
 			} */
 
 
+}
+
+module _roundAntistudTubes(outer_radius,inner_radius,degrees_start,degrees_end) {
+	difference() {
+		union()
+			_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
+				cylinder(h=BRICK_BOTTOM+.2, r=ANTI_STUD_RADIUS);
+		union()
+			_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
+				translate([0,0,-.2])
+					cylinder(h=BRICK_BOTTOM+.3, r=ANTI_STUD_RADIUS-(WALL_THICKNESS*0.6));
+	}
 }
 
 // Place children at each valid antistud location. Keeping the selection logic

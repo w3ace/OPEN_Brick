@@ -76,7 +76,8 @@ Finally, enabled attributes subtract openings or material; the `link` attribute
 then unions a rectangular brick across the arc.
 
 Positive `reduce` values slope inward toward a narrower top. Negative values
-pull the lower outer edge inward, producing a flared profile. The `corbels`
+pull the lower outer edge inward, producing a flared profile and clipping the
+underside anti-stud tubes to that reduced footprint. The `corbels`
 attributes turn that flare into regularly spaced corbels by subtracting the
 spaces between them.
 
