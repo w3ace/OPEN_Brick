@@ -19,6 +19,12 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 	thinwall = attributeValue(attributes, "thinwall", 0);
 	archway = attributeValue(attributes, "archway", 0);
 	link = attributeValue(attributes, "link", 0);
+	// `supports` is retained as a fallback for models made with the old API.
+	// New models should describe the flare's corbels entirely through attributes.
+	corbels = attributeValue(attributes, "corbels", supports);
+	corbel_spacing = attributeValue(attributes, "corbel_spacing", 30);
+	corbel_width = attributeValue(attributes, "corbel_width", 12);
+	corbel_phase = attributeValue(attributes, "corbel_phase", 6);
 
 
 //	thinwall=0, window=0,	chamfer=0,
@@ -36,8 +42,8 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 					: (reduce < 0) ? [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT],
 							[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT],
 							// Drop the outer edge of the polygon for battlements
-							[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT-PLATE_HEIGHT*((supports>0) ? supports : .3)],
-							[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM*((supports>0)?1:1)],
+							[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT-PLATE_HEIGHT*((corbels>0) ? corbels : .3)],
+							[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM],
 							[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM],
 							[0,BRICK_BOTTOM]]
 					: [[0,BRICK_BOTTOM],
@@ -53,8 +59,8 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 							[((outer_radius-inner_radius)*BRICK_WIDTH),0],[0,0]]
 					: (reduce < 0) ?	[[0,0],[0,height*PLATE_HEIGHT+PLATE_HEIGHT],
 							[((outer_radius-inner_radius)*BRICK_WIDTH),height*PLATE_HEIGHT+PLATE_HEIGHT],
-							[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT-PLATE_HEIGHT*((supports>0) ? supports : .3)],
-							[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM*((supports>0)?1:1)],
+							[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT-PLATE_HEIGHT*((corbels>0) ? corbels : .3)],
+							[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),BRICK_BOTTOM],
 							[((outer_radius-inner_radius+reduce)*BRICK_WIDTH),0],[0,0]]
 					: [[0,0],[0,height*PLATE_HEIGHT*1.2],
 							[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT*1.2],
@@ -79,7 +85,7 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3],
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,0], [WALL_THICKNESS,0] ];
 
-		supports_difference_polygon = [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT*.65],
+		corbel_gap_polygon = [[0,BRICK_BOTTOM],[0,height*PLATE_HEIGHT*.65],
 							[(outer_radius-inner_radius)*BRICK_WIDTH,height*PLATE_HEIGHT+PLATE_HEIGHT],
 							[(outer_radius-inner_radius)*BRICK_WIDTH,BRICK_BOTTOM],
 							[0,BRICK_BOTTOM]];
@@ -249,20 +255,22 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 
 	
 
-			// Supports cutouts
-			if(supports>0 && reduce<0) {
-				for(i=[6:30:360]) {
-					if ( i+30>=degrees_start && i-30 <= degrees_end) {
-							rotate([0,0,i])
-								rotate_extrude(angle=18,convexity=10)
+			// Start with the solid flare and remove the gaps between corbels.
+			// Spacing, width, and phase are angles in degrees; phase locates the
+			// leading edge of the first gap in the repeating pattern.
+			corbel_gap = corbel_spacing-corbel_width;
+			if(corbels>0 && reduce<0 && corbel_spacing>0 && corbel_gap>0) {
+				first_gap = floor((degrees_start-corbel_phase-corbel_gap)/corbel_spacing);
+				last_gap = ceil((degrees_end-corbel_phase)/corbel_spacing);
+				for(n=[first_gap:1:last_gap]) {
+					gap_start = corbel_phase+n*corbel_spacing;
+					if (gap_start < degrees_end && gap_start+corbel_gap > degrees_start) {
+							rotate([0,0,gap_start])
+								rotate_extrude(angle=corbel_gap,convexity=10)
 									translate([(outer_radius+reduce)*BRICK_WIDTH,0])
-										polygon(supports_difference_polygon);
+										polygon(corbel_gap_polygon);
 					}
-
-				
-
 				}
-
 			}
 
 			

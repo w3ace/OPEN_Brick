@@ -32,7 +32,6 @@ translate([48, 0, 0])
         height=3,
         degrees_start=0,
         degrees_end=90,
-        supports=0,
         attributes=[["window", 1], ["chamfer", 1]]
     );
 ```
@@ -77,8 +76,9 @@ Finally, enabled attributes subtract openings or material; the `link` attribute
 then unions a rectangular brick across the arc.
 
 Positive `reduce` values slope inward toward a narrower top. Negative values
-pull the lower outer edge inward, producing a flared/battlement-like profile;
-with a negative reduction, `supports` controls repeated relief cutouts.
+pull the lower outer edge inward, producing a flared profile. The `corbels`
+attributes turn that flare into regularly spaced corbels by subtracting the
+spaces between them.
 
 | Parameter | Default | Effect |
 | --- | ---: | --- |
@@ -88,7 +88,6 @@ with a negative reduction, `supports` controls repeated relief cutouts.
 | `height` | `3` | Height in plate units. |
 | `degrees_start` | `10` | Starting angle of the arc, in degrees. Normally set this explicitly (often `0`). |
 | `degrees_end` | `360` | Ending angle; arc sweep is `degrees_end - degrees_start`. |
-| `supports` | `0` | With `reduce < 0`, a positive value sets the vertical depth used by the periodic support/relief cutouts. It has no effect on an unreduced brick. |
 | `attributes` | `[]` | List of `[name, value]` pairs described below. Omitted options use their disabled/default value. |
 
 ## Round-brick attributes
@@ -103,7 +102,11 @@ attributes = [
     ["window", 0],
     ["chamfer", 1],
     ["archway", 0],
-    ["link", 0]
+    ["link", 0],
+    ["corbels", 1],
+    ["corbel_spacing", 30],
+    ["corbel_width", 12],
+    ["corbel_phase", 6]
 ];
 ```
 
@@ -115,6 +118,32 @@ attributes = [
 | `chamfer` | `0` disables it. A positive value clips all four vertical corners at the start and end faces. The current implementation treats all positive values alike. |
 | `archway` | `0` disables it. A positive angle (typically about `15`) cuts a centered, tapered arch through the brick. The angle changes the opening width and vertical scale; values near `0` are invalid because the scale divides by this value. This feature requires `inner_radius > 1`. |
 | `link` | `0` disables it. A positive integer adds a two-stud-wide rectangular brick of that many studs across the curved piece, while removing the overlap first. |
+| `corbels` | `0` disables them. With `reduce < 0`, a positive value creates corbels beneath the upper wall and sets their vertical depth in plate units. |
+| `corbel_spacing` | Angular distance between repeating corbels, in degrees. Defaults to `30` and must be positive. |
+| `corbel_width` | Angular width of each corbel, in degrees. Defaults to `12`; it must be smaller than `corbel_spacing`. |
+| `corbel_phase` | Angular start of the first space between corbels, in degrees. Defaults to `6`, allowing the pattern to be aligned with an arc. |
+
+For example, this makes a quarter-round wall with 12-degree corbels on a
+30-degree pattern:
+
+```scad
+roundBrick(
+    outer_radius=7,
+    inner_radius=5,
+    reduce=-1,
+    height=3,
+    degrees_start=0,
+    degrees_end=90,
+    attributes=[
+        ["corbels", 1],
+        ["corbel_spacing", 30],
+        ["corbel_width", 12]
+    ]
+);
+```
+
+The former `supports` argument remains available as a deprecated fallback for
+`corbels`, so existing models continue to render.
 
 Attributes affect only `roundBrick()`; rectangular bricks use `studstyle`
 instead.
