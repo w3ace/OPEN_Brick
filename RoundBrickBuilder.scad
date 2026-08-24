@@ -92,10 +92,10 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 		// corbels).  A negative reduction makes the flare exactly -reduce studs
 		// deep, so limit the cutter to that region.
 		corbel_overlap = .01;
-		corbel_depth = -reduce*BRICK_WIDTH;
+		corbel_depth = -reduce*BRICK_WIDTH*1.1;
 		corbel_gap_polygon = [[-corbel_overlap,BRICK_BOTTOM-corbel_overlap],
-							[-corbel_overlap,height*PLATE_HEIGHT*.65],
-							[corbel_depth+corbel_overlap,height*PLATE_HEIGHT+PLATE_HEIGHT],
+							[-corbel_overlap,height*PLATE_HEIGHT*.5],
+							[corbel_depth+corbel_overlap,height*PLATE_HEIGHT],
 							[corbel_depth+corbel_overlap,BRICK_BOTTOM-corbel_overlap]];
 
 		inner_difference_polygon = [[0,0],[0,height*PLATE_HEIGHT+PLATE_HEIGHT*2],
@@ -137,13 +137,13 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 							rotate([0,0,degrees_start])
 	                            translate([inner_radius*BRICK_WIDTH,0,0])
 	                            	rotate([0,90,0])
-		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH,convexity=10)
+		                                linear_extrude(height=(outer_radius-inner_radius+((reduce<0)?reduce:0))*BRICK_WIDTH,convexity=10)
 		                                    polygon([[0,0],[-BRICK_BOTTOM,0],[-BRICK_BOTTOM,WALL_THICKNESS],
 		                                        [0,WALL_THICKNESS],[0,0]]);
 							rotate([0,0,degrees_end])
 	                            translate([inner_radius*BRICK_WIDTH,0,0])
 	                            	rotate([0,90,0])
-		                                linear_extrude(height=(outer_radius-inner_radius)*BRICK_WIDTH,convexity=10)
+		                                linear_extrude(height=(outer_radius-inner_radius+((reduce<0)?reduce:0))*BRICK_WIDTH,convexity=10)
 		                                    polygon([[0,0],[-BRICK_BOTTOM,0],[-BRICK_BOTTOM,-WALL_THICKNESS],
 		                                        [0,-WALL_THICKNESS],[0,0]]);
 
@@ -370,8 +370,8 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 
 		//	echo (x,y,(x*x+y*y),studstyle,(atan2(y,x)+360)%360,outer_radius,outer_radius*outer_radius,inner_radius,inner_radius*inner_radius);
 
-			if( ( x*x+y*y <= ((outer_radius-((studstyle==4)?.7:0))*(outer_radius-((studstyle==4)?.7:0)))) //*4)/4) 
-				&& (x*x+y*y >= ((inner_radius+((studstyle==4)?.7:0))*(inner_radius+((studstyle==4)?.7:0))))
+			if( ( x*x+y*y <= ((outer_radius-((studstyle==4)?.7:1))*(outer_radius-((studstyle==4)?.7:1)))) //*4)/4) 
+				&& (x*x+y*y >= ((inner_radius+((studstyle==4)?.7:-.2))*(inner_radius+((studstyle==4)?.7:-.2))))
 				&& ((atan2(y,x)+360)%360) >= degrees_start - ((studstyle==4)?5:0) // ((inner_radius == 0) ? -5 : 0))
 				 && ((atan2(y,x)+360)%360) <= degrees_end + ((studstyle==4)?5:0)
 				) { //*4)/4)) {

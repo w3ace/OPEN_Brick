@@ -1,7 +1,7 @@
 # OPEN Brick
 
 An OpenSCAD library for constructing 3D-printable, LEGO-compatible rectangular
-and curved bricks. The original brick builder was written by Jorg Janssen in
+and curved bricks. Foundation came from a brick builder written by Jorg Janssen in
 2013 (CC BY-NC 3.0); curved-brick features were added by Craig Wood in 2018.
 
 > **Fit note:** the dimensions in `_conf.scad` are useful starting points, but
