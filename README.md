@@ -22,6 +22,7 @@ include <_conf.scad>;
 include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
+include <StudCountRoundBrickBuilder.scad>;
 
 rectBrick(length=4, width=2, height=3, studstyle=1);
 
@@ -149,6 +150,47 @@ The former `supports` argument remains available as a deprecated fallback for
 
 Attributes affect only `roundBrick()`; rectangular bricks use `studstyle`
 instead.
+
+### Stud-count round bricks
+
+`studCountRoundBrick()` makes a one-stud-wide circular brick whose radius is
+derived from the requested number of studs around the complete circle. Unlike
+the radius-based round builder, its studs follow a circular grid. The radius to
+the stud centres is calculated from the 8 mm chord between adjacent centres:
+
+```text
+radius = 8 / (2 * sin(180 / circumference_studs))
+```
+
+For example, this creates a four-stud brick belonging to a 40-stud circle. Its
+four studs occupy 36 degrees, and every adjacent pair of stud centres is
+exactly 8 mm apart:
+
+```scad
+include <StudCountRoundBrickBuilder.scad>;
+
+studCountRoundBrick(
+    studs=4,
+    circumference_studs=40,
+    height=3,
+    start_angle=0,
+    studs_on_top=true
+);
+```
+
+| Parameter | Default | Effect |
+| --- | ---: | --- |
+| `studs` | `4` | Number of studs, and therefore angular pitches, occupied by this brick. |
+| `circumference_studs` | `40` | Number of 8 mm stud chords in a complete circle; must be an integer of at least 4. |
+| `height` | `3` | Height in plate units. |
+| `start_angle` | `0` | Angle of the centre of the first stud. The brick extends half a pitch before it. |
+| `studs_on_top` | `true` | Set to `false` for a smooth top. |
+
+The body extends 4 mm to either side of the stud-centre circle, making it
+exactly one 8 mm stud pitch wide. It has an open underside and clutch pins
+between neighbouring studs, like a conventional one-stud-wide brick. Setting
+`studs` equal to `circumference_studs` closes both the body and pin pattern into
+a complete ring.
 
 ### Round battlements
 
