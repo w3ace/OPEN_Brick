@@ -33,8 +33,8 @@ $fs = $preview ? 1 : 0.4;
 
 include <_conf.scad>;
 include <RectBrickBuilder.scad>;
-
 include <RoundBrickBuilder.scad>;
+include <RoundBattlementBuilder.scad>;
 
 // include <ReducerBrickBuilder.scad>;
 
@@ -45,15 +45,32 @@ include <RoundBrickBuilder.scad>;
  //
 
 	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
+    
+    /*
+color("DarkKhaki") {
+    
+roundBattlement(
+    outer_radius=7,
+    inner_radius=6,
+    height=6,
+    degrees_start=0,
+    degrees_end=90,
+    merlon_angle=10,
+    crenel_angle=8,
+    phase=4,
+    studs=true
+);
+}*/
+    
 
-outer_radius= 5;
-inner_radius =3;
-// Negate Reduction is 1ease
-reduce = -1;
-height=6;
+outer_radius= 15;
+inner_radius =14;
+    // Negate Reduction is 1ease
+reduce = 0;
+height=3;
 
 degrees_start =0;
-degrees_end = 90;
+degrees_end = 45;
 supports = 0;
 
 attributes = [["thinwall",0],["link",0],
@@ -61,14 +78,15 @@ attributes = [["thinwall",0],["link",0],
                ["flattop",0],
                ["window",0],
                ["chamfer",0],
-               ["corbels",1],
+               ["corbels",0],
                ["corbel_spacing",30],
                ["corbel_width",12]];
 
                
+               
+               
 //translate([-BRICK_WIDTH,inner_radius*BRICK_WIDTH,0])
 //rectBrick(length=2,width=2,height=3);
-
 
 
   
@@ -87,6 +105,8 @@ color("DarkKhaki") {
         attributes
     ); 
 }
+
+
 
 /*
 

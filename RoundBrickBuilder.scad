@@ -26,9 +26,7 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 	corbel_width = attributeValue(attributes, "corbel_width", 12);
 	corbel_phase = attributeValue(attributes, "corbel_phase", 6);
 
-
-//	thinwall=0, window=0,	chamfer=0,
-	// window=0, chamfer=0, supports=0) {
+	BRICK_BOTTOM = STUD_HEIGHT+.3+(height-1)*PLATE_HEIGHT;
 
 	// roundBrick - build a round toy brick
 	// 
@@ -72,17 +70,17 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 							[((outer_radius-inner_radius-abs(reduce))*BRICK_WIDTH)-WALL_THICKNESS,BRICK_BOTTOM+WALL_THICKNESS/3],				
 							[-.1,BRICK_BOTTOM+WALL_THICKNESS/3]]			;	
 
-		bottom_polygon = [[0,0],[0,BRICK_BOTTOM],
-							[(outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH,BRICK_BOTTOM],
-							[(outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH,0], 
+		bottom_polygon = [[0,0],[0,STUD_HEIGHT+.3+(height-1)*PLATE_HEIGHT],
+							[(outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH,STUD_HEIGHT+.3+(height-1)*PLATE_HEIGHT],
+							[(outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH,0],
 							[0,0]];
 
-		bottom_difference_polygon = (inner_radius == 0) ? [[0,0],[0,STUD_HEIGHT+.3],
-							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3],
+		bottom_difference_polygon = (inner_radius == 0) ? [[0,0],[0,BRICK_BOTTOM],
+							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3+(height-1)*PLATE_HEIGHT],
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,-.1], [0,0]]
 
-					: [[WALL_THICKNESS,0],[WALL_THICKNESS,STUD_HEIGHT+.3],
-							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3],
+					: [[WALL_THICKNESS,0],[WALL_THICKNESS,BRICK_BOTTOM],
+							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,STUD_HEIGHT+.3+(height-1)*PLATE_HEIGHT],
 							[((outer_radius-inner_radius+((reduce<0) ? reduce:0))*BRICK_WIDTH)-WALL_THICKNESS,0], [WALL_THICKNESS,0] ];
 
 		// Give the cutter a small overlap on every CSG boundary.  The old cutter
@@ -370,8 +368,8 @@ module makeRoundStuds(outer_radius=2,inner_radius=1,height=3,studstyle=1,degrees
 
 		//	echo (x,y,(x*x+y*y),studstyle,(atan2(y,x)+360)%360,outer_radius,outer_radius*outer_radius,inner_radius,inner_radius*inner_radius);
 
-			if( ( x*x+y*y <= ((outer_radius-((studstyle==4)?.7:1))*(outer_radius-((studstyle==4)?.7:1)))) //*4)/4) 
-				&& (x*x+y*y >= ((inner_radius+((studstyle==4)?.7:-.2))*(inner_radius+((studstyle==4)?.7:-.2))))
+			if( ( x*x+y*y <= ((outer_radius-((studstyle==4)?.7:0))*(outer_radius-((studstyle==4)?.7:0)))) //*4)/4) 
+				&& (x*x+y*y >= ((inner_radius+((studstyle==4)?.7:.1))*(inner_radius+((studstyle==4)?.7:.1))))
 				&& ((atan2(y,x)+360)%360) >= degrees_start - ((studstyle==4)?5:0) // ((inner_radius == 0) ? -5 : 0))
 				 && ((atan2(y,x)+360)%360) <= degrees_end + ((studstyle==4)?5:0)
 				) { //*4)/4)) {
@@ -452,14 +450,17 @@ module makeRoundAntistuds(outer_radius=2,inner_radius=1,height=3,degrees_start=0
 }
 
 module _roundAntistudTubes(outer_radius,inner_radius,degrees_start,degrees_end) {
+
+
+	BRICK_BOTTOM = STUD_HEIGHT+.3+(height-1)*PLATE_HEIGHT;
 	difference() {
 		union()
 			_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
 				cylinder(h=BRICK_BOTTOM+.2, r=ANTI_STUD_RADIUS);
 		union()
 			_roundAntistudGrid(outer_radius,inner_radius,degrees_start,degrees_end)
-				translate([0,0,-.2])
-					cylinder(h=BRICK_BOTTOM+.3, r=ANTI_STUD_RADIUS-(WALL_THICKNESS*0.6));
+				translate([0,0,-.3])
+					cylinder(h=BRICK_BOTTOM+.5, r=ANTI_STUD_RADIUS-(WALL_THICKNESS*0.65));
 	}
 }
 

@@ -57,6 +57,7 @@ module roundBattlement(outer_radius=7, inner_radius=6, height=6,
 						outer_radius, inner_radius, height,
 						crenel_floor, crenel_start, crenel_end
 					);
+					
 	}
 }
 
@@ -66,7 +67,7 @@ module roundBattlement(outer_radius=7, inner_radius=6, height=6,
 // rather than a scalloped outer wall.
 module _roundCrenelCutter(outer_radius, inner_radius, height, floor_height,
 		degrees_start, degrees_end) {
-	overlap = .02;
+	overlap = .2;
 	rotate([0, 0, degrees_start])
 		rotate_extrude(angle=degrees_end-degrees_start, convexity=10)
 			polygon([
