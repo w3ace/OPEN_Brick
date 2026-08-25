@@ -145,9 +145,10 @@ module _roundStudCountMasonryFaces(inner_radius, outer_radius, z, height,
 
 
 // Form a shallow frustum rather than a square-sided slot.  The opening at the
-// brick face is widest and each edge slopes inward at 45 degrees to give the
-// individual stones a chamfered edge.  Bed joints keep their angular ends
-// square because those ends normally lie at the brick's end walls.
+// brick face is narrowest and the cut widens toward its recessed bottom.  This
+// leaves the exposed (outside) edge of each simulated stone wider than its
+// inside edge.  Bed joints keep their angular ends square because those ends
+// normally lie at the brick's end walls.
 module _roundStudCountBeveledJoint(surface_radius, bottom_radius, z, height,
 		angle_start, angle_sweep, bevel_angle=45, bevel_angular=true) {
 	depth = abs(bottom_radius-surface_radius);
@@ -161,17 +162,17 @@ module _roundStudCountBeveledJoint(surface_radius, bottom_radius, z, height,
 	n = segments+1;
 	points = concat(
 		[for (i=[0:segments])
-			let(a=angle_start+angle_inset+(angle_sweep-2*angle_inset)*i/segments)
-			[bottom_radius*cos(a), bottom_radius*sin(a), z+inset]],
-		[for (i=[0:segments])
-			let(a=angle_start+angle_inset+(angle_sweep-2*angle_inset)*i/segments)
-			[bottom_radius*cos(a), bottom_radius*sin(a), z+height-inset]],
+			let(a=angle_start+angle_sweep*i/segments)
+			[bottom_radius*cos(a), bottom_radius*sin(a), z]],
 		[for (i=[0:segments])
 			let(a=angle_start+angle_sweep*i/segments)
-			[surface_radius*cos(a), surface_radius*sin(a), z]],
+			[bottom_radius*cos(a), bottom_radius*sin(a), z+height]],
 		[for (i=[0:segments])
-			let(a=angle_start+angle_sweep*i/segments)
-			[surface_radius*cos(a), surface_radius*sin(a), z+height]]
+			let(a=angle_start+angle_inset+(angle_sweep-2*angle_inset)*i/segments)
+			[surface_radius*cos(a), surface_radius*sin(a), z+inset]],
+		[for (i=[0:segments])
+			let(a=angle_start+angle_inset+(angle_sweep-2*angle_inset)*i/segments)
+			[surface_radius*cos(a), surface_radius*sin(a), z+height-inset]]
 	);
 	polyhedron(points=points, faces=concat(
 		[for (i=[0:segments-1]) [i, i+1, n+i+1, n+i]],
