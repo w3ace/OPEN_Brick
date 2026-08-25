@@ -57,10 +57,10 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 				_roundStudCountWedge(
 					inner_radius+WALL_THICKNESS,
 					outer_radius-WALL_THICKNESS,
-					height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,
+					height*PLATE_HEIGHT-WALL_THICKNESS,
 					brick_start+end_wall_angle,
 					brick_sweep-2*end_wall_angle,
-					z=-CORRECTION
+					z=0
 				);
 
 				if (masonry > 0)
@@ -73,8 +73,8 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 			if (studs_on_top)
 				for (i = [0:studs-1])
 					rotate([0, 0, start_angle+i*angle_pitch])
-						translate([center_radius, 0, height*PLATE_HEIGHT-CORRECTION])
-							cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
+						translate([center_radius, 0, height*PLATE_HEIGHT])
+							cylinder(h=STUD_HEIGHT, r=STUD_RADIUS);
 
 			// As on a conventional one-stud-wide brick, clutch pins sit between
 			// neighbouring studs. A complete ring also gets the closing pin.
@@ -84,7 +84,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 					rotate([0, 0, start_angle+(i+.5)*angle_pitch])
 						translate([center_radius, 0, 0])
 							cylinder(
-								h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,
+								h=height*PLATE_HEIGHT-WALL_THICKNESS,
 								r=PIN_RADIUS
 							);
 		}
@@ -104,7 +104,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
 		angle_start, angle_sweep) {
 	overlap = .1;
-	segments = max(8, ceil(angle_sweep/3));
+	segments = max(12, ceil(angle_sweep/3));
 	mid_radius = (inner_radius+outer_radius)/2;
 	opening_width = mid_radius*angle_sweep*PI/180;
 	arch_rise = min(opening_width/2, (brick_height-WALL_THICKNESS)/2);

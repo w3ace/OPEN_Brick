@@ -38,13 +38,14 @@ include <RoundBattlementBuilder.scad>;
 include <StudCountRoundBrickBuilder.scad>;
 
 studCountRoundBrick(
-    studs=8,
+    studs=4,
     circumference_studs=32,
-    height=3,
+    height=6,
     start_angle=0,
     studs_on_top=true,
-    attributes=[["masonry", 1]]
+    attributes=[["archway", 1]]
 );
+
 
 
 
