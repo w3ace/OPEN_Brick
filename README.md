@@ -186,7 +186,20 @@ studCountRoundBrick(
 | `height` | `3` | Height in plate units. |
 | `start_angle` | `0` | Angle of the centre of the first stud. The brick extends half a pitch before it. |
 | `studs_on_top` | `true` | Set to `false` for a smooth top. |
-| `attributes` | `[]` | List of `[name, value]` pairs. `masonry` is currently the supported attribute. |
+| `attributes` | `[]` | List of `[name, value]` pairs. `masonry` adds mortar joints; `archway` cuts a centred arched opening when set above zero. |
+
+An archway reserves one stud pitch at each end as its supporting sides, so the
+brick must contain at least three studs. The remaining stud pitches form the
+opening. For example:
+
+```scad
+studCountRoundBrick(
+    studs=5,
+    circumference_studs=40,
+    height=3,
+    attributes=[["archway", 1]]
+);
+```
 
 The `masonry` attribute is disabled by default. Set it to a positive value to
 cut shallow mortar joints into both the outer and inner curved walls. The
