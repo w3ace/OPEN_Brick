@@ -194,7 +194,8 @@ upright joints alternate by half a stud pitch between courses, producing a
 running-bond masonry pattern while leaving the end walls of partial arcs
 unchanged. Mortar-joint edges rake outward at 45 degrees from the recessed
 joint toward the face, leaving the exposed outside of each simulated stone
-wider than its inside edge.
+wider than its inside edge. The top and bottom courses receive the same bevel
+where their curved faces meet the horizontal brick surfaces.
 
 The body extends 4 mm to either side of the stud-centre circle, making it
 exactly one 8 mm stud pitch wide. It has an open underside and clutch pins

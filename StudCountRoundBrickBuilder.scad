@@ -99,7 +99,16 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 		2*asin(min(1, joint_width/(2*((inner_radius+outer_radius)/2)))));
 	end_margin = full_circle ? 0 : joint_angle;
 
-	// Horizontal bed joints.
+	// Bevel the top and bottom edges with half of a bed-joint profile.  Extending
+	// the cutter across each body boundary gives the first and last masonry
+	// courses the same raked edge as the courses between them.
+	for (z = [-joint_width/2, brick_height-joint_width/2])
+		_roundStudCountMasonryFaces(
+			inner_radius, outer_radius, z, joint_width,
+			angle_start, angle_sweep, joint_depth, false
+		);
+
+	// Horizontal bed joints between courses.
 	if (course_count > 1)
 		for (course = [1:course_count-1])
 			if (course*course_height < brick_height)
