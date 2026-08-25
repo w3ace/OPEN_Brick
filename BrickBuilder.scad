@@ -35,8 +35,16 @@ include <_conf.scad>;
 include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
+include <StudCountRoundBrickBuilder.scad>;
 
-// include <ReducerBrickBuilder.scad>;
+studCountRoundBrick(
+    studs=8,
+    circumference_studs=32,
+    height=3,
+    start_angle=0,
+    studs_on_top=true,
+    attributes=[["masonry", 1]]
+);
 
 
 
@@ -88,7 +96,7 @@ attributes = [["thinwall",0],["link",0],
 //translate([-BRICK_WIDTH,inner_radius*BRICK_WIDTH,0])
 //rectBrick(length=2,width=2,height=3);
 
-
+/*
   
 color("DarkKhaki") {
     roundBrick(
@@ -106,7 +114,7 @@ color("DarkKhaki") {
     ); 
 }
 
-
+*/
 
 /*
 

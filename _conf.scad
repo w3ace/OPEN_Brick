@@ -9,7 +9,7 @@ FLU = 1.6; 					   // Fundamental Lego Unit = 1.6 mm
 BRICK_WIDTH = 5*FLU;    	   // basic brick width
 BRICK_HEIGHT = 6*FLU;   	   // basic brick height
 PLATE_HEIGHT = 1.97*FLU;   	// basic plate height
-WALL_THICKNESS = 0.75*FLU;   	// outer wall of the brick
+WALL_THICKNESS = 0.9*FLU;   	// outer wall of the brick
 STUD_RADIUS = 1.55 *FLU;  	// studs are the small cylinders on top of the brick 
 							// with the lego logo ('nopje' in Dutch)
 STUD_HEIGHT = FLU*1.2;
@@ -21,5 +21,5 @@ PIN_RADIUS = FLU;           // a pin is the small cylinder inside bricks that ha
 SUPPORT_THICKNESS = 0.8;    // SUPPORT_THICKNESS: support is the thin surface between anti studs, 
                             // pins and walls, your printer might not print this thin, try thicker!
 EDGE = 0.254;               // EDGE: this is the width and height of the bottom line edge of smooth bricks
-CORRECTION = 0.4;           // CORRECTION: addition to each size, to make sure all parts connect by 
+CORRECTION = 0;             // CORRECTION: addition to each size, to make sure all parts connect by 
                             // moving them a little inside each other

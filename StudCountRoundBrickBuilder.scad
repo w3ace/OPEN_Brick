@@ -91,8 +91,8 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 // ends so its structural end walls retain clean edges.
 module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 		angle_start, angle_sweep, angle_pitch, full_circle=false) {
-	joint_depth = min(.3, WALL_THICKNESS/3);
-	joint_width = .35;
+	joint_depth = min(1, WALL_THICKNESS/2);
+	joint_width = .45;
 	course_height = 1.5*PLATE_HEIGHT;
 	course_count = ceil(brick_height/course_height);
 	joint_angle = min(angle_pitch/5,
@@ -140,7 +140,7 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 
 module _roundStudCountMasonryFaces(inner_radius, outer_radius, z, height,
 		angle_start, angle_sweep, depth, bevel_angular=true) {
-	overlap = .02;
+	overlap = .08;
 	bevel_angle = 45;
 	_roundStudCountBeveledJoint(
 		inner_radius-overlap, inner_radius+depth, z, height,
@@ -161,10 +161,10 @@ module _roundStudCountMasonryFaces(inner_radius, outer_radius, z, height,
 module _roundStudCountBeveledJoint(surface_radius, bottom_radius, z, height,
 		angle_start, angle_sweep, bevel_angle=45, bevel_angular=true) {
 	depth = abs(bottom_radius-surface_radius);
-	inset = min(depth/tan(bevel_angle), height/2-CORRECTION);
+	inset = min(depth/tan(bevel_angle), height/2-1);
 	mid_radius = (surface_radius+bottom_radius)/2;
 	angle_inset = bevel_angular
-		? min(angle_sweep/2-CORRECTION,
+		? min(angle_sweep/2-1,
 			2*asin(min(1, inset/(2*mid_radius))))
 		: 0;
 	segments = max(1, ceil(angle_sweep/3));
