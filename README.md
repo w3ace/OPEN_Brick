@@ -174,7 +174,8 @@ studCountRoundBrick(
     circumference_studs=40,
     height=3,
     start_angle=0,
-    studs_on_top=true
+    studs_on_top=true,
+    attributes=[["masonry", 1]]
 );
 ```
 
@@ -185,6 +186,13 @@ studCountRoundBrick(
 | `height` | `3` | Height in plate units. |
 | `start_angle` | `0` | Angle of the centre of the first stud. The brick extends half a pitch before it. |
 | `studs_on_top` | `true` | Set to `false` for a smooth top. |
+| `attributes` | `[]` | List of `[name, value]` pairs. `masonry` is currently the supported attribute. |
+
+The `masonry` attribute is disabled by default. Set it to a positive value to
+cut shallow mortar joints into both the outer and inner curved walls. The
+upright joints alternate by half a stud pitch between courses, producing a
+running-bond masonry pattern while leaving the end walls of partial arcs
+unchanged.
 
 The body extends 4 mm to either side of the stud-centre circle, making it
 exactly one 8 mm stud pitch wide. It has an open underside and clutch pins
