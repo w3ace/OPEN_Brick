@@ -192,7 +192,9 @@ The `masonry` attribute is disabled by default. Set it to a positive value to
 cut shallow mortar joints into both the outer and inner curved walls. The
 upright joints alternate by half a stud pitch between courses, producing a
 running-bond masonry pattern while leaving the end walls of partial arcs
-unchanged.
+unchanged. Mortar-joint edges rake inward at 45 degrees instead of meeting the
+recess at a square corner, so the exposed edges of each simulated stone appear
+beveled or chamfered.
 
 The body extends 4 mm to either side of the stud-centre circle, making it
 exactly one 8 mm stud pitch wide. It has an open underside and clutch pins

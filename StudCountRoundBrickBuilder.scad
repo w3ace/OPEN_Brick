@@ -106,7 +106,7 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 				_roundStudCountMasonryFaces(
 					inner_radius, outer_radius,
 					course*course_height-joint_width/2, joint_width,
-					angle_start, angle_sweep, joint_depth
+					angle_start, angle_sweep, joint_depth, false
 				);
 
 	// Upright joints, staggered on successive courses.
@@ -130,24 +130,57 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 
 
 module _roundStudCountMasonryFaces(inner_radius, outer_radius, z, height,
-		angle_start, angle_sweep, depth) {
+		angle_start, angle_sweep, depth, bevel_angular=true) {
 	overlap = .02;
-	rotate([0, 0, angle_start])
-		rotate_extrude(angle=angle_sweep, convexity=10)
-			polygon([
-				[inner_radius-overlap, z],
-				[inner_radius+depth, z],
-				[inner_radius+depth, z+height],
-				[inner_radius-overlap, z+height]
-			]);
-	rotate([0, 0, angle_start])
-		rotate_extrude(angle=angle_sweep, convexity=10)
-			polygon([
-				[outer_radius-depth, z],
-				[outer_radius+overlap, z],
-				[outer_radius+overlap, z+height],
-				[outer_radius-depth, z+height]
-			]);
+	bevel_angle = 45;
+	_roundStudCountBeveledJoint(
+		inner_radius-overlap, inner_radius+depth, z, height,
+		angle_start, angle_sweep, bevel_angle, bevel_angular
+	);
+	_roundStudCountBeveledJoint(
+		outer_radius+overlap, outer_radius-depth, z, height,
+		angle_start, angle_sweep, bevel_angle, bevel_angular
+	);
+}
+
+
+// Form a shallow frustum rather than a square-sided slot.  The opening at the
+// brick face is widest and each edge slopes inward at 45 degrees to give the
+// individual stones a chamfered edge.  Bed joints keep their angular ends
+// square because those ends normally lie at the brick's end walls.
+module _roundStudCountBeveledJoint(surface_radius, bottom_radius, z, height,
+		angle_start, angle_sweep, bevel_angle=45, bevel_angular=true) {
+	depth = abs(bottom_radius-surface_radius);
+	inset = min(depth/tan(bevel_angle), height/2-CORRECTION);
+	mid_radius = (surface_radius+bottom_radius)/2;
+	angle_inset = bevel_angular
+		? min(angle_sweep/2-CORRECTION,
+			2*asin(min(1, inset/(2*mid_radius))))
+		: 0;
+	segments = max(1, ceil(angle_sweep/3));
+	n = segments+1;
+	points = concat(
+		[for (i=[0:segments])
+			let(a=angle_start+angle_inset+(angle_sweep-2*angle_inset)*i/segments)
+			[bottom_radius*cos(a), bottom_radius*sin(a), z+inset]],
+		[for (i=[0:segments])
+			let(a=angle_start+angle_inset+(angle_sweep-2*angle_inset)*i/segments)
+			[bottom_radius*cos(a), bottom_radius*sin(a), z+height-inset]],
+		[for (i=[0:segments])
+			let(a=angle_start+angle_sweep*i/segments)
+			[surface_radius*cos(a), surface_radius*sin(a), z]],
+		[for (i=[0:segments])
+			let(a=angle_start+angle_sweep*i/segments)
+			[surface_radius*cos(a), surface_radius*sin(a), z+height]]
+	);
+	polyhedron(points=points, faces=concat(
+		[for (i=[0:segments-1]) [i, i+1, n+i+1, n+i]],
+		[for (i=[0:segments-1]) [2*n+i, 3*n+i, 3*n+i+1, 2*n+i+1]],
+		[for (i=[0:segments-1]) [i, 2*n+i, 2*n+i+1, i+1]],
+		[for (i=[0:segments-1]) [n+i, n+i+1, 3*n+i+1, 3*n+i]],
+		[[0, n, 3*n, 2*n]],
+		[[segments, 2*n+segments, 3*n+segments, n+segments]]
+	), convexity=10);
 }
 
 
