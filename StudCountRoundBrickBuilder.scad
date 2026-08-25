@@ -28,6 +28,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 	brick_sweep = studs*angle_pitch;
 	full_circle = studs == circumference_studs;
 	masonry = attributeValue(attributes, "masonry", 0);
+	archway = attributeValue(attributes, "archway", 0);
 	// Convert the desired end-wall thickness to an angle at the stud centres.
 	end_wall_angle = full_circle ? 0 : min(angle_pitch/3,
 		asin(min(1, WALL_THICKNESS/(2*center_radius)))*2);
@@ -39,49 +40,98 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 	assert(studs <= circumference_studs,
 		"studCountRoundBrick: studs cannot exceed circumference_studs");
 	assert(height > 0, "studCountRoundBrick: height must be positive");
+	assert(archway <= 0 || studs >= 3,
+		"studCountRoundBrick: archway requires at least 3 studs");
+	assert(archway <= 0 || height*PLATE_HEIGHT > WALL_THICKNESS,
+		"studCountRoundBrick: archway height must exceed the top-wall thickness");
 
-	union() {
-		// A hollow, open-bottom shell with radial walls and, for an arc, solid
-		// end walls. The top is left thick enough to support the studs.
-		difference() {
-			_roundStudCountWedge(
-				inner_radius, outer_radius, height*PLATE_HEIGHT,
-				brick_start, brick_sweep
-			);
-			_roundStudCountWedge(
-				inner_radius+WALL_THICKNESS,
-				outer_radius-WALL_THICKNESS,
-				height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,
-				brick_start+end_wall_angle,
-				brick_sweep-2*end_wall_angle,
-				z=-CORRECTION
-			);
-
-			if (masonry > 0)
-				_roundStudCountMasonry(
+	difference() {
+		union() {
+			// A hollow, open-bottom shell with radial walls and, for an arc, solid
+			// end walls. The top is left thick enough to support the studs.
+			difference() {
+				_roundStudCountWedge(
 					inner_radius, outer_radius, height*PLATE_HEIGHT,
-					brick_start, brick_sweep, angle_pitch, full_circle
+					brick_start, brick_sweep
 				);
+				_roundStudCountWedge(
+					inner_radius+WALL_THICKNESS,
+					outer_radius-WALL_THICKNESS,
+					height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,
+					brick_start+end_wall_angle,
+					brick_sweep-2*end_wall_angle,
+					z=-CORRECTION
+				);
+
+				if (masonry > 0)
+					_roundStudCountMasonry(
+						inner_radius, outer_radius, height*PLATE_HEIGHT,
+						brick_start, brick_sweep, angle_pitch, full_circle
+					);
+			}
+
+			if (studs_on_top)
+				for (i = [0:studs-1])
+					rotate([0, 0, start_angle+i*angle_pitch])
+						translate([center_radius, 0, height*PLATE_HEIGHT-CORRECTION])
+							cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
+
+			// As on a conventional one-stud-wide brick, clutch pins sit between
+			// neighbouring studs. A complete ring also gets the closing pin.
+			pin_count = full_circle ? studs : studs-1;
+			if (pin_count > 0)
+				for (i = [0:pin_count-1])
+					rotate([0, 0, start_angle+(i+.5)*angle_pitch])
+						translate([center_radius, 0, 0])
+							cylinder(
+								h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,
+								r=PIN_RADIUS
+							);
 		}
 
-		if (studs_on_top)
-			for (i = [0:studs-1])
-				rotate([0, 0, start_angle+i*angle_pitch])
-					translate([center_radius, 0, height*PLATE_HEIGHT-CORRECTION])
-						cylinder(h=STUD_HEIGHT+CORRECTION, r=STUD_RADIUS);
-
-		// As on a conventional one-stud-wide brick, clutch pins sit between
-		// neighbouring studs. A complete ring also gets the closing pin.
-		pin_count = full_circle ? studs : studs-1;
-		if (pin_count > 0)
-			for (i = [0:pin_count-1])
-				rotate([0, 0, start_angle+(i+.5)*angle_pitch])
-					translate([center_radius, 0, 0])
-						cylinder(
-							h=height*PLATE_HEIGHT-WALL_THICKNESS+CORRECTION,
-							r=PIN_RADIUS
-						);
+		if (archway > 0)
+			_roundStudCountArchway(
+				inner_radius, outer_radius, height*PLATE_HEIGHT,
+				brick_start+angle_pitch, brick_sweep-2*angle_pitch
+			);
 	}
+}
+
+
+// Cut a centred opening while retaining one complete stud pitch as a pier at
+// each end of the brick.  The semicircular profile is compressed vertically
+// when necessary so even a wide opening retains a printable top wall.
+module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
+		angle_start, angle_sweep) {
+	overlap = .1;
+	segments = max(8, ceil(angle_sweep/3));
+	mid_radius = (inner_radius+outer_radius)/2;
+	opening_width = mid_radius*angle_sweep*PI/180;
+	arch_rise = min(opening_width/2, (brick_height-WALL_THICKNESS)/2);
+	spring_height = brick_height-WALL_THICKNESS-arch_rise;
+	n = segments+1;
+	points = concat(
+		[for (r=[inner_radius-overlap, outer_radius+overlap])
+			for (i=[0:segments])
+				let(a=angle_start+angle_sweep*i/segments)
+				[r*cos(a), r*sin(a), -overlap]],
+		[for (r=[inner_radius-overlap, outer_radius+overlap])
+			for (i=[0:segments])
+				let(
+					a=angle_start+angle_sweep*i/segments,
+					u=2*i/segments-1,
+					z=spring_height+arch_rise*sqrt(max(0, 1-u*u))
+				)
+				[r*cos(a), r*sin(a), z]]
+	);
+	polyhedron(points=points, faces=concat(
+		[for (i=[0:segments-1]) [i, i+1, n+i+1, n+i]],
+		[for (i=[0:segments-1]) [2*n+i, 3*n+i, 3*n+i+1, 2*n+i+1]],
+		[for (i=[0:segments-1]) [i, 2*n+i, 2*n+i+1, i+1]],
+		[for (i=[0:segments-1]) [n+i, n+i+1, 3*n+i+1, 3*n+i]],
+		[[0, n, 3*n, 2*n]],
+		[[segments, 2*n+segments, 3*n+segments, n+segments]]
+	), convexity=10);
 }
 
 
