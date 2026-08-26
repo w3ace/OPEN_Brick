@@ -98,11 +98,23 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 			if (pin_count > 0)
 				for (i = [0:pin_count-1])
 					rotate([0, 0, start_angle+(i+.5)*angle_pitch])
-						translate([center_radius, 0, 0])
-							cylinder(
-								h=height*PLATE_HEIGHT-WALL_THICKNESS,
-								r=PIN_RADIUS
-							);
+						union() {
+							translate([center_radius, 0, 0])
+								cylinder(
+									h=height*PLATE_HEIGHT-WALL_THICKNESS,
+									r=PIN_RADIUS
+								);
+
+							// Tie every pin into both curved walls with a radial rib.
+							// The rib fills the body's usable height but remains thin
+							// enough not to obstruct the neighbouring clutch spaces.
+							translate([inner_radius, -WALL_THICKNESS/4, 0])
+								cube([
+									outer_radius-inner_radius,
+									WALL_THICKNESS/2,
+									height*PLATE_HEIGHT-WALL_THICKNESS
+								]);
+						}
 		}
 
 		if (archway > 0)
