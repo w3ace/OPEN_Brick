@@ -70,6 +70,22 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 					);
 			}
 
+			// Bridge the hollow body around the opening with a full-depth arch
+			// lining.  The final archway subtraction below removes its centre,
+			// leaving one wall thickness at the jambs and over the arch.
+			if (archway > 0) {
+				arch_mid_radius = (inner_radius+outer_radius)/2;
+				arch_shell_angle =
+					2*asin(min(1, WALL_THICKNESS/(2*arch_mid_radius)));
+				_roundStudCountArchway(
+					inner_radius, outer_radius, height*PLATE_HEIGHT,
+					brick_start+angle_pitch-arch_shell_angle,
+					brick_sweep-2*angle_pitch+2*arch_shell_angle,
+					profile_angle_sweep=brick_sweep-2*angle_pitch,
+					profile_padding=WALL_THICKNESS
+				);
+			}
+
 			if (studs_on_top)
 				for (i = [0:studs-1])
 					rotate([0, 0, start_angle+i*angle_pitch])
@@ -102,11 +118,14 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 // each end of the brick.  The semicircular profile is compressed vertically
 // when necessary so even a wide opening retains a printable top wall.
 module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
-		angle_start, angle_sweep) {
+		angle_start, angle_sweep, profile_angle_sweep=undef,
+		profile_padding=0) {
 	overlap = .1;
 	segments = max(12, ceil(angle_sweep/3));
 	mid_radius = (inner_radius+outer_radius)/2;
-	opening_width = mid_radius*angle_sweep*PI/180;
+	profile_sweep = is_undef(profile_angle_sweep)
+		? angle_sweep : profile_angle_sweep;
+	opening_width = mid_radius*profile_sweep*PI/180;
 	arch_rise = min(opening_width/2, (brick_height-WALL_THICKNESS)/2);
 	spring_height = brick_height-WALL_THICKNESS-arch_rise;
 	n = segments+1;
@@ -121,6 +140,7 @@ module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
 					a=angle_start+angle_sweep*i/segments,
 					u=2*i/segments-1,
 					z=spring_height+arch_rise*sqrt(max(0, 1-u*u))
+						+profile_padding
 				)
 				[r*cos(a), r*sin(a), z]]
 	);

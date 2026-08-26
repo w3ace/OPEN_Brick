@@ -188,8 +188,11 @@ studCountRoundBrick(
 | `studs_on_top` | `true` | Set to `false` for a smooth top. |
 | `attributes` | `[]` | List of `[name, value]` pairs. `masonry` adds mortar joints; `archway` cuts a centred arched opening when set above zero. |
 
-An archway reserves one stud pitch at each end as its supporting sides, so the
-brick must contain at least three studs. The remaining stud pitches form the
+An archway reserves one stud pitch at each end as its supporting sides. A
+`WALL_THICKNESS` lining follows the jambs and curved top through the hollow
+interior, joining the brick's inner and outer faces, so the opening does not
+leave those faces unsupported. The brick must contain at least three studs.
+The remaining stud pitches form the
 opening. For example:
 
 ```scad
