@@ -120,7 +120,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 		if (archway > 0)
 			_roundStudCountArchway(
 				inner_radius, outer_radius, height*PLATE_HEIGHT,
-				brick_start+angle_pitch, brick_sweep-2*angle_pitch
+				brick_start+angle_pitch, brick_sweep-2*angle_pitch,undef,0,.1
 			);
 	}
 }
@@ -131,9 +131,8 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 // when necessary so even a wide opening retains a printable top wall.
 module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
 		angle_start, angle_sweep, profile_angle_sweep=undef,
-		profile_padding=0) {
-	overlap = .1;
-	segments = max(12, ceil(angle_sweep/3));
+		profile_padding=0,overlap=0) {
+	segments = max(16, ceil(angle_sweep/3));
 	mid_radius = (inner_radius+outer_radius)/2;
 	profile_sweep = is_undef(profile_angle_sweep)
 		? angle_sweep : profile_angle_sweep;
@@ -154,7 +153,7 @@ module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
 					z=spring_height+arch_rise*sqrt(max(0, 1-u*u))
 						+profile_padding
 				)
-				[r*cos(a), r*sin(a), z]]
+				[r*cos(a), r*sin(a), z+overlap]]
 	);
 	polyhedron(points=points, faces=concat(
 		[for (i=[0:segments-1]) [i, i+1, n+i+1, n+i]],
