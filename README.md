@@ -22,7 +22,7 @@ include <_conf.scad>;
 include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
-include <StudCountRoundBrickBuilder.scad>;
+include <RadialBrickBuilder.scad>;
 
 rectBrick(length=4, width=2, height=3, studstyle=1);
 
@@ -151,9 +151,9 @@ The former `supports` argument remains available as a deprecated fallback for
 Attributes affect only `roundBrick()`; rectangular bricks use `studstyle`
 instead.
 
-### Stud-count round bricks
+### Radial bricks
 
-`studCountRoundBrick()` makes a one-stud-wide circular brick whose radius is
+`radial_brick()` makes a one-stud-wide circular brick whose radius is
 derived from the requested number of studs around the complete circle. Unlike
 the radius-based round builder, its studs follow a circular grid. The radius to
 the stud centres is calculated from the 8 mm chord between adjacent centres:
@@ -167,9 +167,9 @@ four studs occupy 36 degrees, and every adjacent pair of stud centres is
 exactly 8 mm apart:
 
 ```scad
-include <StudCountRoundBrickBuilder.scad>;
+include <RadialBrickBuilder.scad>;
 
-studCountRoundBrick(
+radial_brick(
     studs=4,
     circumference_studs=40,
     height=3,
@@ -200,7 +200,7 @@ The remaining stud pitches form the
 opening. For example:
 
 ```scad
-studCountRoundBrick(
+radial_brick(
     studs=5,
     circumference_studs=40,
     height=3,

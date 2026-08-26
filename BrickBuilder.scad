@@ -35,9 +35,9 @@ include <_conf.scad>;
 include <RectBrickBuilder.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
-include <StudCountRoundBrickBuilder.scad>;
+include <RadialBrickBuilder.scad>;
 
-studCountRoundBrick(
+radial_brick(
     studs=2,
     circumference_studs=32,
     height=3,
