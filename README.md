@@ -23,6 +23,7 @@ include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
 include <grid_circle_brick.scad>;
+include <grid_radial_builder.scad>;
 
 grid_rectangle_brick(length=4, width=2, height=3, studstyle=1);
 
@@ -222,6 +223,33 @@ exactly one 8 mm stud pitch wide. It has an open underside and clutch pins
 between neighbouring studs, like a conventional one-stud-wide brick. Setting
 `studs` equal to `circumference_studs` closes both the body and pin pattern into
 a complete ring.
+
+### Grid-radial bricks
+
+`grid_radial_builder()` combines the two connection systems: its underside
+uses the conventional Cartesian anti-stud grid, while its top studs form one
+radial row. `circumference_studs` sets the complete circle's stud count, so the
+chord between adjacent top-stud centres remains exactly 8 mm. The builder rounds
+the required outer body radius up to an integer stud pitch and sets the inner
+radius exactly two integer pitches smaller.
+
+```scad
+include <grid_radial_builder.scad>;
+
+grid_radial_builder(
+    circumference_studs=32,
+    degrees_start=0,
+    degrees_end=90,
+    height=3
+);
+```
+
+| Parameter | Default | Effect |
+| --- | ---: | --- |
+| `circumference_studs` | `32` | Number of chord-spaced top studs in a complete 360-degree ring; must be an integer of at least 4. |
+| `degrees_start` | `0` | Starting angle of the body and first radial top stud. |
+| `degrees_end` | `360` | Ending angle of the body; the sweep must be positive and no greater than 360 degrees. |
+| `height` | `3` | Height in plate units. |
 
 ### Round battlements
 
