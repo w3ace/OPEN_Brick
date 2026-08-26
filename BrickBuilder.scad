@@ -35,7 +35,7 @@ include <_conf.scad>;
 include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
-include <grid_circle_brick.scad>;
+include <radial_brick.scad>;
 include <grid_radial_builder.scad>;
 
 
