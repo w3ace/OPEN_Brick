@@ -32,12 +32,12 @@ $fa = $preview ? 12 : 4;
 $fs = $preview ? 1 : 0.4;
 
 include <_conf.scad>;
-include <RectBrickBuilder.scad>;
+include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
-include <RadialBrickBuilder.scad>;
+include <grid_circle_brick.scad>;
 
-radial_brick(
+grid_circle_brick(
     studs=2,
     circumference_studs=32,
     height=3,
@@ -95,7 +95,7 @@ attributes = [["thinwall",0],["link",0],
                
                
 //translate([-BRICK_WIDTH,inner_radius*BRICK_WIDTH,0])
-//rectBrick(length=2,width=2,height=3);
+//grid_rectangle_brick(length=2,width=2,height=3);
 
 /*
   

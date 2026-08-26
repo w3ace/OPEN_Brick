@@ -319,7 +319,7 @@ module roundBrick(		outer_radius=2, inner_radius = 1, reduce=0, height = 3,
 
 			if (link > 0)
 				translate([-round(link/2)*BRICK_WIDTH+.3,inner_radius*BRICK_WIDTH+.3,0])
-					rectBrick(length=link,width=2,height=height);
+					grid_rectangle_brick(length=link,width=2,height=height);
 
 			if (archway > 0) {
 

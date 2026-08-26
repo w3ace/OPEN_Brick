@@ -27,7 +27,7 @@
 $fn = 150;
 
 include <_conf.scad>;
-include <RectBrickBuilder.scad>;
+include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 // include <ReducerBrickBuilder.scad>;
 
