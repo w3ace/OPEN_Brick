@@ -38,52 +38,32 @@ include <RoundBattlementBuilder.scad>;
 include <grid_circle_brick.scad>;
 include <grid_radial_builder.scad>;
 
-grid_circle_brick(
-    studs=2,
-    circumference_studs=32,
+
+
+grid_radial_builder(
+    circumference_studs=36,
     height=3,
-    start_angle=0,
-    studs_on_top=true,
-    attributes=[["masonry", 0]]
+    reduce=.5,
+    degrees_start =0,
+    degrees_end = 90
 );
 
 
+/*
 
 
- // this is it:
- //brick(1,6,3);
- //
-
-	//round_brick(8,8,3, studstyle=1,radius=4,inner_radius=2,degrees=90 );
-    
-    /*
-color("DarkKhaki") {
-    
-roundBattlement(
-    outer_radius=7,
-    inner_radius=6,
-    height=6,
-    degrees_start=0,
-    degrees_end=90,
-    merlon_angle=10,
-    crenel_angle=8,
-    phase=4,
-    studs=true
-);
-}*/
-    
-
-outer_radius= 15;
-inner_radius =14;
+outer_radius= 7;
+inner_radius =5;
     // Negate Reduction is 1ease
 reduce = 0;
 height=3;
 
-degrees_start =0;
-degrees_end = 45;
+degrees_start =60;
+degrees_end = 120;
 supports = 0;
 
 attributes = [["thinwall",0],["link",0],
+                ["studs",0],
                ["archway",0],
                ["flattop",0],
                ["window",0],
@@ -98,7 +78,7 @@ attributes = [["thinwall",0],["link",0],
 //translate([-BRICK_WIDTH,inner_radius*BRICK_WIDTH,0])
 //grid_rectangle_brick(length=2,width=2,height=3);
 
-/*
+
   
 color("DarkKhaki") {
     roundBrick(
@@ -114,7 +94,7 @@ color("DarkKhaki") {
 
         attributes
     ); 
-}
+};
 
 */
 

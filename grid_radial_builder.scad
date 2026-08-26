@@ -28,7 +28,7 @@ function grid_radial_inner_radius(circumference_studs) =
 
 
 module grid_radial_builder(circumference_studs=32, degrees_start=0,
-		degrees_end=360, height=3) {
+		degrees_end=360, height=3, reduce=0) {
 	angle_pitch = 360/circumference_studs;
 	stud_radius = grid_radial_stud_radius(circumference_studs);
 	outer_radius = grid_radial_outer_radius(circumference_studs);
@@ -55,16 +55,19 @@ module grid_radial_builder(circumference_studs=32, degrees_start=0,
 		roundBrick(
 			outer_radius=outer_radius,
 			inner_radius=inner_radius,
-			reduce=0,
+			reduce=reduce,
 			height=height,
 			degrees_start=degrees_start,
 			degrees_end=degrees_end,
 			attributes=[["flattop", 1]]
 		);
 
-		for (i = [0:stud_count-1])
+		rotate([0,0,180/circumference_studs])
+		for (i = [0:stud_count-2])
 			rotate([0, 0, degrees_start+i*angle_pitch])
 				translate([stud_radius, 0, height*PLATE_HEIGHT-.1])
 					cylinder(h=STUD_HEIGHT+.1, r=STUD_RADIUS);
+
 	}
+
 }
