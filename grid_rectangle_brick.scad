@@ -12,7 +12,7 @@
  Use height = 0 to just put studs/knobs on top of other things.
 */
 
-module rectBrick (length = 4, width = 2, height = 3, studstyle = 1 ){
+module grid_rectangle_brick (length = 4, width = 2, height = 3, studstyle = 1 ){
 
 	difference() {
 		union() {

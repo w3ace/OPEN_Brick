@@ -21,7 +21,7 @@ $fa = $preview ? 12 : 4;
 $fs = $preview ? 1 : 0.4;
 
 include <_conf.scad>;
-include <RectBrickBuilder.scad>;
+include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 // include <ReducerBrickBuilder.scad>;
 
@@ -44,7 +44,7 @@ module longhouseBrick (base=5,length=10) {
     union() {
     for(x= [0:base-1]) {
         translate([0,x*BRICK_WIDTH,0]) {
-            rectBrick(length,1,3,1);
+            grid_rectangle_brick(length,1,3,1);
         }
 
     }

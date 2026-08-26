@@ -19,12 +19,12 @@ $fa = $preview ? 12 : 4;
 $fs = $preview ? 1 : 0.4;
 
 include <_conf.scad>;
-include <RectBrickBuilder.scad>;
+include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
-include <RadialBrickBuilder.scad>;
+include <grid_circle_brick.scad>;
 
-rectBrick(length=4, width=2, height=3, studstyle=1);
+grid_rectangle_brick(length=4, width=2, height=3, studstyle=1);
 
 translate([48, 0, 0])
     roundBrick(
@@ -43,9 +43,9 @@ in plate units: `height=1` is a plate and `height=3` is a conventional brick.
 
 ## How the blocks are constructed
 
-### Rectangular bricks
+### Grid-rectangle bricks
 
-`rectBrick()` builds a brick in three stages:
+`grid_rectangle_brick()` builds a brick in three stages:
 
 1. **Shell:** `makeShell()` creates the outside cuboid, subtracts the lower
    cavity to leave the configured wall thickness, and opens holes beneath any
@@ -58,7 +58,7 @@ in plate units: `height=1` is a plate and `height=3` is a conventional brick.
    features to the walls so the underside remains printable and rigid.
 
 ```scad
-rectBrick(length=4, width=2, height=3, studstyle=1);
+grid_rectangle_brick(length=4, width=2, height=3, studstyle=1);
 ```
 
 | Parameter | Default | Effect |
@@ -148,12 +148,12 @@ roundBrick(
 The former `supports` argument remains available as a deprecated fallback for
 `corbels`, so existing models continue to render.
 
-Attributes affect only `roundBrick()`; rectangular bricks use `studstyle`
+Attributes affect only `roundBrick()`; grid-rectangle bricks use `studstyle`
 instead.
 
-### Radial bricks
+### Grid-circle bricks
 
-`radial_brick()` makes a one-stud-wide circular brick whose radius is
+`grid_circle_brick()` makes a one-stud-wide circular brick whose radius is
 derived from the requested number of studs around the complete circle. Unlike
 the radius-based round builder, its studs follow a circular grid. The radius to
 the stud centres is calculated from the 8 mm chord between adjacent centres:
@@ -167,9 +167,9 @@ four studs occupy 36 degrees, and every adjacent pair of stud centres is
 exactly 8 mm apart:
 
 ```scad
-include <RadialBrickBuilder.scad>;
+include <grid_circle_brick.scad>;
 
-radial_brick(
+grid_circle_brick(
     studs=4,
     circumference_studs=40,
     height=3,
@@ -200,7 +200,7 @@ The remaining stud pitches form the
 opening. For example:
 
 ```scad
-radial_brick(
+grid_circle_brick(
     studs=5,
     circumference_studs=40,
     height=3,
