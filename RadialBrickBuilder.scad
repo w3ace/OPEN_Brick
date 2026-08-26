@@ -1,7 +1,7 @@
 /*
 
-Build one-stud-wide circular bricks from a stud count rather than a nominal
-radius. Adjacent stud centres are always one 8 mm stud pitch apart.
+Build one-stud-wide radial bricks from a circumference stud count rather than
+a nominal radius. Adjacent stud centres are always one 8 mm stud pitch apart.
 
 */
 
@@ -11,17 +11,17 @@ include <BrickFunctions.scad>;
 
 // Circumradius of a regular polygon whose side is one stud pitch. OpenSCAD's
 // trigonometric functions use degrees.
-function studCountRadius(circumference_studs, stud_pitch=BRICK_WIDTH) =
+function radial_brick_radius(circumference_studs, stud_pitch=BRICK_WIDTH) =
 	stud_pitch/(2*sin(180/circumference_studs));
 
 
 // Make an arc containing `studs` top studs out of a circle containing
 // `circumference_studs` studs. The brick occupies exactly one angular pitch
 // per stud and is one 8 mm stud pitch wide in the radial direction.
-module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
+module radial_brick(studs=4, circumference_studs=40, height=3,
 		start_angle=0, studs_on_top=true, attributes=[]) {
 	angle_pitch = 360/circumference_studs;
-	center_radius = studCountRadius(circumference_studs);
+	center_radius = radial_brick_radius(circumference_studs);
 	inner_radius = center_radius-BRICK_WIDTH/2;
 	outer_radius = center_radius+BRICK_WIDTH/2;
 	brick_start = start_angle-angle_pitch/2;
@@ -34,27 +34,27 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 		asin(min(1, WALL_THICKNESS/(2*center_radius)))*2);
 
 	assert(circumference_studs >= 4 && circumference_studs == floor(circumference_studs),
-		"studCountRoundBrick: circumference_studs must be an integer of at least 4");
+		"radial_brick: circumference_studs must be an integer of at least 4");
 	assert(studs >= 1 && studs == floor(studs),
-		"studCountRoundBrick: studs must be a positive integer");
+		"radial_brick: studs must be a positive integer");
 	assert(studs <= circumference_studs,
-		"studCountRoundBrick: studs cannot exceed circumference_studs");
-	assert(height > 0, "studCountRoundBrick: height must be positive");
+		"radial_brick: studs cannot exceed circumference_studs");
+	assert(height > 0, "radial_brick: height must be positive");
 	assert(archway <= 0 || studs >= 3,
-		"studCountRoundBrick: archway requires at least 3 studs");
+		"radial_brick: archway requires at least 3 studs");
 	assert(archway <= 0 || height*PLATE_HEIGHT > WALL_THICKNESS,
-		"studCountRoundBrick: archway height must exceed the top-wall thickness");
+		"radial_brick: archway height must exceed the top-wall thickness");
 
 	difference() {
 		union() {
 			// A hollow, open-bottom shell with radial walls and, for an arc, solid
 			// end walls. The top is left thick enough to support the studs.
 			difference() {
-				_roundStudCountWedge(
+				_radial_brick_wedge(
 					inner_radius, outer_radius, height*PLATE_HEIGHT,
 					brick_start, brick_sweep
 				);
-				_roundStudCountWedge(
+				_radial_brick_wedge(
 					inner_radius+WALL_THICKNESS,
 					outer_radius-WALL_THICKNESS,
 					height*PLATE_HEIGHT-WALL_THICKNESS,
@@ -64,7 +64,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 				);
 
 				if (masonry > 0)
-					_roundStudCountMasonry(
+					_radial_brick_masonry(
 						inner_radius, outer_radius, height*PLATE_HEIGHT,
 						brick_start, brick_sweep, angle_pitch, full_circle
 					);
@@ -77,7 +77,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 				arch_mid_radius = (inner_radius+outer_radius)/2;
 				arch_shell_angle =
 					2*asin(min(1, WALL_THICKNESS/(2*arch_mid_radius)));
-				_roundStudCountArchway(
+				_radial_brick_archway(
 					inner_radius, outer_radius, height*PLATE_HEIGHT,
 					brick_start+angle_pitch-arch_shell_angle,
 					brick_sweep-2*angle_pitch+2*arch_shell_angle,
@@ -118,7 +118,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 		}
 
 		if (archway > 0)
-			_roundStudCountArchway(
+			_radial_brick_archway(
 				inner_radius, outer_radius, height*PLATE_HEIGHT,
 				brick_start+angle_pitch, brick_sweep-2*angle_pitch,undef,0,.1
 			);
@@ -129,7 +129,7 @@ module studCountRoundBrick(studs=4, circumference_studs=40, height=3,
 // Cut a centred opening while retaining one complete stud pitch as a pier at
 // each end of the brick.  The semicircular profile is compressed vertically
 // when necessary so even a wide opening retains a printable top wall.
-module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
+module _radial_brick_archway(inner_radius, outer_radius, brick_height,
 		angle_start, angle_sweep, profile_angle_sweep=undef,
 		profile_padding=0,overlap=0) {
 	segments = max(16, ceil(angle_sweep/3));
@@ -170,7 +170,7 @@ module _roundStudCountArchway(inner_radius, outer_radius, brick_height,
 // half plates high, and alternate courses shift their upright joints by half a
 // stud pitch to create a running-bond pattern.  The cuts stop short of an arc's
 // ends so its structural end walls retain clean edges.
-module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
+module _radial_brick_masonry(inner_radius, outer_radius, brick_height,
 		angle_start, angle_sweep, angle_pitch, full_circle=false) {
 	joint_depth = min(1, WALL_THICKNESS/2);
 	joint_width = .45;
@@ -184,7 +184,7 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 	// the cutter across each body boundary gives the first and last masonry
 	// courses the same raked edge as the courses between them.
 	for (z = [-joint_width/2, brick_height-joint_width/2])
-		_roundStudCountMasonryFaces(
+		_radial_brick_masonry_faces(
 			inner_radius, outer_radius, z, joint_width,
 			angle_start, angle_sweep, joint_depth, false
 		);
@@ -193,7 +193,7 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 	if (course_count > 1)
 		for (course = [1:course_count-1])
 			if (course*course_height < brick_height)
-				_roundStudCountMasonryFaces(
+				_radial_brick_masonry_faces(
 					inner_radius, outer_radius,
 					course*course_height-joint_width/2, joint_width,
 					angle_start, angle_sweep, joint_depth, false
@@ -209,7 +209,7 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 			if (full_circle ||
 				(joint_center-joint_angle/2 > angle_start+end_margin &&
 				 joint_center+joint_angle/2 < angle_start+angle_sweep-end_margin))
-				_roundStudCountMasonryFaces(
+				_radial_brick_masonry_faces(
 					inner_radius, outer_radius, course_bottom,
 					course_top-course_bottom, joint_center-joint_angle/2,
 					joint_angle, joint_depth
@@ -219,15 +219,15 @@ module _roundStudCountMasonry(inner_radius, outer_radius, brick_height,
 }
 
 
-module _roundStudCountMasonryFaces(inner_radius, outer_radius, z, height,
+module _radial_brick_masonry_faces(inner_radius, outer_radius, z, height,
 		angle_start, angle_sweep, depth, bevel_angular=true) {
 	overlap = .08;
 	bevel_angle = 45;
-	_roundStudCountBeveledJoint(
+	_radial_brick_beveled_joint(
 		inner_radius-overlap, inner_radius+depth, z, height,
 		angle_start, angle_sweep, bevel_angle, bevel_angular
 	);
-	_roundStudCountBeveledJoint(
+	_radial_brick_beveled_joint(
 		outer_radius+overlap, outer_radius-depth, z, height,
 		angle_start, angle_sweep, bevel_angle, bevel_angular
 	);
@@ -239,7 +239,7 @@ module _roundStudCountMasonryFaces(inner_radius, outer_radius, z, height,
 // leaves the exposed (outside) edge of each simulated stone wider than its
 // inside edge.  Bed joints keep their angular ends square because those ends
 // normally lie at the brick's end walls.
-module _roundStudCountBeveledJoint(surface_radius, bottom_radius, z, height,
+module _radial_brick_beveled_joint(surface_radius, bottom_radius, z, height,
 		angle_start, angle_sweep, bevel_angle=45, bevel_angular=true) {
 	depth = abs(bottom_radius-surface_radius);
 	inset = min(depth/tan(bevel_angle), height/2-1);
@@ -275,7 +275,7 @@ module _roundStudCountBeveledJoint(surface_radius, bottom_radius, z, height,
 }
 
 
-module _roundStudCountWedge(inner_radius, outer_radius, wedge_height,
+module _radial_brick_wedge(inner_radius, outer_radius, wedge_height,
 		angle_start, angle_sweep, z=0) {
 	rotate([0, 0, angle_start])
 		rotate_extrude(angle=angle_sweep, convexity=10)
