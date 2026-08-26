@@ -39,16 +39,28 @@ include <grid_circle_brick.scad>;
 include <grid_radial_builder.scad>;
 
 
+radial_brick(
+    circumference_studs = 32,
+    height = 3,
+    studs = 2,
+    attributes=[
+        ["archway",0,],
+        ["masonry",1]]
+);
 
+
+
+
+/*
 grid_radial_builder(
     circumference_studs=36,
     height=3,
     reduce=.5,
-    degrees_start =0,
-    degrees_end = 90
+    degrees_start =110,
+    degrees_end = 180
 );
 
-
+*/
 /*
 
 
@@ -118,11 +130,3 @@ color("DarkKhaki") {
 // 
 
 
-//reducerBrick(5,4,3,degrees=90);
-
-
-//roundBrick(4,3,3,degrees=90);
-
-// module brick
-// 
-// create a lego brick length x width x height 
