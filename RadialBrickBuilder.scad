@@ -108,11 +108,11 @@ module radial_brick(studs=4, circumference_studs=40, height=3,
 							// Tie every pin into both curved walls with a radial rib.
 							// The rib fills the body's usable height but remains thin
 							// enough not to obstruct the neighbouring clutch spaces.
-							translate([inner_radius, -WALL_THICKNESS/4, 0])
+							translate([inner_radius+.05, -WALL_THICKNESS/4, STUD_HEIGHT+.02])
 								cube([
-									outer_radius-inner_radius,
+									outer_radius-inner_radius-.1,
 									WALL_THICKNESS/2,
-									height*PLATE_HEIGHT-WALL_THICKNESS
+									height*PLATE_HEIGHT-WALL_THICKNESS-STUD_HEIGHT-.02
 								]);
 						}
 		}
