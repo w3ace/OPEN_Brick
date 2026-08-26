@@ -36,6 +36,7 @@ include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
 include <grid_circle_brick.scad>;
+include <grid_radial_builder.scad>;
 
 grid_circle_brick(
     studs=2,
