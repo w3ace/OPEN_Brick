@@ -1,18 +1,22 @@
 /*
 
- Basic Lego brick builder module for OpenScad by Jorg Janssen 2013 (CC BY-NC 3.0) 
+ Basic Lego brick builder module for OpenScad by Jorg Janssen 2013 (CC BY-NC 3.0)
  To use this in your own projects add:
 
  use <path_to_this_file/lego_brick_builder.scad>
  brick (length, width, height [,smooth]);
 
- Length and width are in standard lego brick dimensions. 
+ Length and width are in standard lego brick dimensions.
  Height is in flat brick heights, so for a normal lego brick height = 3.
- Add optional smooth = true for a brick without studs. 
+ Add optional smooth = true for a brick without studs.
  Use height = 0 to just put studs/knobs on top of other things.
 */
 
-module grid_rectangle_brick (length = 4, width = 2, height = 3, studstyle = 1 ){
+include <BrickFunctions.scad>;
+
+module grid_rectangle_brick (length = 4, width = 2, height = 3, studstyle = 1,
+	attributes = [] ){
+	masonry = attributeValue(attributes, "masonry", 0);
 
 	difference() {
 		union() {
@@ -24,7 +28,117 @@ module grid_rectangle_brick (length = 4, width = 2, height = 3, studstyle = 1 ){
 			}
 			antistuds(length,width,height,studstyle);
 		}
+		if (masonry > 0)
+			_grid_rectangle_masonry(length, width, height*PLATE_HEIGHT);
 	//	chamfer_corners(length,width,height);
+	}
+}
+
+// Cut the same shallow, 45-degree-raked running-bond joints used by
+// radial_brick().  Bed joints wrap all four faces, while alternate courses
+// offset upright joints by half a stud pitch.
+module _grid_rectangle_masonry(length, width, brick_height) {
+	joint_depth = min(1, WALL_THICKNESS/2);
+	joint_width = .45;
+	course_height = 1.5*PLATE_HEIGHT;
+	course_count = ceil(brick_height/course_height);
+	x_size = length*BRICK_WIDTH-CORRECTION;
+	y_size = width*BRICK_WIDTH-CORRECTION;
+
+	// Extending the first and last bed joints across the body boundary bevels
+	// the edges of the bottom and top courses as on a radial masonry brick.
+	for (z = [0, brick_height])
+		_grid_rectangle_bed_joint(x_size, y_size, z, joint_width, joint_depth);
+
+	if (course_count > 1)
+		for (course = [1:course_count-1])
+			if (course*course_height < brick_height)
+				_grid_rectangle_bed_joint(
+					x_size, y_size, course*course_height,
+					joint_width, joint_depth
+				);
+
+	for (course = [0:course_count-1]) {
+		course_bottom = course*course_height;
+		course_top = min((course+1)*course_height, brick_height);
+		phase = (course % 2)*BRICK_WIDTH/2;
+
+		for (x = [phase:BRICK_WIDTH:x_size])
+			if (x > joint_width/2 && x < x_size-joint_width/2)
+				_grid_rectangle_upright_joint(
+					x, course_bottom, course_top-course_bottom,
+					y_size, true, joint_width, joint_depth
+				);
+		for (y = [phase:BRICK_WIDTH:y_size])
+			if (y > joint_width/2 && y < y_size-joint_width/2)
+				_grid_rectangle_upright_joint(
+					y, course_bottom, course_top-course_bottom,
+					x_size, false, joint_width, joint_depth
+				);
+	}
+}
+
+module _grid_rectangle_bed_joint(x_size, y_size, z, joint_width, depth) {
+	_grid_rectangle_face_joint(x_size, 0, z, joint_width, y_size, depth, true);
+	_grid_rectangle_face_joint(x_size, y_size, z, joint_width, y_size, depth, true);
+	_grid_rectangle_face_joint(y_size, 0, z, joint_width, x_size, depth, false);
+	_grid_rectangle_face_joint(y_size, x_size, z, joint_width, x_size, depth, false);
+}
+
+module _grid_rectangle_upright_joint(position, z, height, face_length,
+		x_faces, joint_width, depth) {
+	if (x_faces) {
+		_grid_rectangle_face_joint(position, 0, z+height/2, height,
+			face_length, depth, false, joint_width);
+		_grid_rectangle_face_joint(position, face_length, z+height/2, height,
+			face_length, depth, false, joint_width);
+	} else {
+		_grid_rectangle_face_joint(position, 0, z+height/2, height,
+			face_length, depth, true, joint_width);
+		_grid_rectangle_face_joint(position, face_length, z+height/2, height,
+			face_length, depth, true, joint_width);
+	}
+}
+
+// `along_x` selects a face parallel to X.  The optional `span` makes an
+// upright cutter; otherwise the cutter spans the complete face for a bed
+// joint.  Hull between the narrow face slot and wider recessed slot produces
+// the 45-degree rake.
+module _grid_rectangle_face_joint(position, face, z, joint_height,
+		face_length, depth, along_x=true, span=undef) {
+	overlap = .08;
+	upright = !is_undef(span);
+	face_width = upright ? span : face_length+2*overlap;
+	inside_width = face_width+2*depth;
+	inside_height = joint_height+2*depth;
+	far_face = face > 0;
+
+	hull() {
+		if (along_x)
+			translate([
+				upright ? position-face_width/2 : -overlap,
+				far_face ? face-overlap : -overlap,
+				z-joint_height/2
+			]) cube([face_width, overlap*2, joint_height]);
+		else
+			translate([
+				far_face ? face-overlap : -overlap,
+				upright ? position-face_width/2 : -overlap,
+				z-joint_height/2
+			]) cube([overlap*2, face_width, joint_height]);
+
+		if (along_x)
+			translate([
+				upright ? position-inside_width/2 : -overlap,
+				far_face ? face-depth : depth-overlap,
+				z-inside_height/2
+			]) cube([upright ? inside_width : face_width, overlap, inside_height]);
+		else
+			translate([
+				far_face ? face-depth : depth-overlap,
+				upright ? position-inside_width/2 : -overlap,
+				z-inside_height/2
+			]) cube([overlap, upright ? inside_width : face_width, inside_height]);
 	}
 }
 

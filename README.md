@@ -25,7 +25,13 @@ include <RoundBattlementBuilder.scad>;
 include <grid_circle_brick.scad>;
 include <grid_radial_builder.scad>;
 
-grid_rectangle_brick(length=4, width=2, height=3, studstyle=1);
+grid_rectangle_brick(
+    length=4,
+    width=2,
+    height=3,
+    studstyle=1,
+    attributes=[["masonry", 1]]
+);
 
 translate([48, 0, 0])
     roundBrick(
@@ -68,6 +74,12 @@ grid_rectangle_brick(length=4, width=2, height=3, studstyle=1);
 | `width` | `2` | Brick width in stud pitches. |
 | `height` | `3` | Height in plate units. |
 | `studstyle` | `1` | `0`: no top studs; `1`: solid studs; `2`: half-depth hollow studs; `3`: through-hole/Technic studs. Style `4` is an internal cutting style used to form underside openings, not a normal top style. |
+| `attributes` | `[]` | List of `[name, value]` pairs. A positive `masonry` value cuts shallow mortar joints into all four walls. |
+
+The optional `masonry` attribute follows the radial brick's treatment: courses
+are one and a half plates high, upright joints shift by half a stud on
+alternate courses, and the recessed joints rake outward at 45 degrees. It is
+disabled by default, so existing calls retain their original geometry.
 
 ### Round and arc bricks
 
@@ -149,8 +161,8 @@ roundBrick(
 The former `supports` argument remains available as a deprecated fallback for
 `corbels`, so existing models continue to render.
 
-Attributes affect only `roundBrick()`; grid-rectangle bricks use `studstyle`
-instead.
+These attributes affect only `roundBrick()`. Grid-rectangle bricks accept a
+separate `masonry` attribute in addition to their `studstyle` parameter.
 
 ### Grid-circle bricks
 
