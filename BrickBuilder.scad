@@ -26,7 +26,7 @@
 */
 // Keep curved parts responsive in the preview while retaining a smooth export.
 // Using a fixed $fn here made every small stud use 150 facets as well as the
-// large ring, which needlessly multiplied the cost of every boolean operation.
+    // large ring, which needlessly multiplied the cost of every boolean operation.
 $fn = 0;
 $fa = $preview ? 12 : 4;
 $fs = $preview ? 1 : 0.4;
@@ -36,34 +36,69 @@ include <grid_rectangle_brick.scad>;
 include <RoundBrickBuilder.scad>;
 include <RoundBattlementBuilder.scad>;
 include <radial_brick.scad>;
+include <grid_rectangle_brick.scad>;
 include <grid_radial_builder.scad>;
 
 
-radial_brick(
-    circumference_studs = 32,
-    height = 3,
-    studs = 2,
-    attributes=[
-        ["archway",0,],
-        ["masonry",1]]
-);
+    translate([0,-6,0])
+grid_rectangle_brick(
+    length =4,
+    width =2,
+    height =3
+    );
+
+for(i=[2:2:8])
+    translate([0,6*i,0])
+        grid_rectangle_brick(
+            length =i,
+            width =1,
+            height =3
+            );
 
 
-
-
+    
 /*
+
+
+for(i=[1:1:6])
+    translate([12*i,0,0])
+    rotate([0,0,-i*5])
+        radial_brick(
+            circumference_studs = 40,
+            height = 3,
+            studs = i,
+            studs_on_top =1,
+            attributes=[
+                ["archway",0,],
+                ["masonry",1]]
+        );
+   
+
+for(i=[1:1:3])
+    translate([12*i,0,0])
+
+        radial_brick(
+            circumference_studs = 32,
+            height = 9,
+            studs = 4,
+            attributes=[
+                ["archway",1,],
+                ["masonry",1]]
+        );
+
+
 grid_radial_builder(
-    circumference_studs=36,
+    circumference_studs=24,
     height=3,
-    reduce=.5,
-    degrees_start =110,
-    degrees_end = 180
+    reduce=.6,
+    degrees_start =0,
+    degrees_end = 90
 );
 
-*/
+
+
+
 /*
-
-
 outer_radius= 7;
 inner_radius =5;
     // Negate Reduction is 1ease

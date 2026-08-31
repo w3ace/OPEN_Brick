@@ -57,7 +57,7 @@ module radial_brick(studs=4, circumference_studs=40, height=3,
 				_radial_brick_wedge(
 					inner_radius+WALL_THICKNESS,
 					outer_radius-WALL_THICKNESS,
-					height*PLATE_HEIGHT-WALL_THICKNESS,
+					height*PLATE_HEIGHT-WALL_THICKNESS/2,
 					brick_start+end_wall_angle,
 					brick_sweep-2*end_wall_angle,
 					z=0
